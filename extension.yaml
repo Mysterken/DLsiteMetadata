@@ -1,0 +1,7 @@
+﻿Id: DLsiteMetadata_db03c8d9-645a-4359-aafb-01cda945f301
+Name: Custom Metadata Provider
+Author: John Doe
+Version: 1.0
+Module: DLsiteMetadata.dll
+Type: MetadataProvider
+Icon: icon.png
