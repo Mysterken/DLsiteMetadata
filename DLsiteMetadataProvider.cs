@@ -1,29 +1,49 @@
-﻿using Playnite.SDK.Plugins;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Playnite.SDK.Plugins;
 
-namespace DLsiteMetadata
+namespace DLsiteMetadata;
+
+public class DLsiteMetadataProvider(MetadataRequestOptions options, DLsiteMetadataPlugin plugin)
+    : OnDemandMetadataProvider
 {
-    public class DLsiteMetadataProvider : OnDemandMetadataProvider
+    private readonly DLsiteMetadataPlugin _plugin = plugin;
+
+    private List<MetadataField> _availableFields;
+    private GameData _gameData;
+
+    public override List<MetadataField> AvailableFields =>
+        _availableFields ??= GetAvailableFields();
+
+    // Override additional methods based on supported metadata fields.
+    public override string GetDescription(GetMetadataFieldArgs args)
     {
-        private readonly MetadataRequestOptions options;
-        private readonly DLsiteMetadata plugin;
+        if (!_availableFields.Contains(MetadataField.Description)) return base.GetDescription(args);
 
-        public override List<MetadataField> AvailableFields => throw new NotImplementedException();
+        return options.GameData.Name + " description";
+    }
 
-        public DLsiteMetadataProvider(MetadataRequestOptions options, DLsiteMetadata plugin)
+    public override string GetName(GetMetadataFieldArgs args)
+    {
+        if (!_availableFields.Contains(MetadataField.Name)) return base.GetName(args);
+
+        return options.GameData.Name;
+    }
+
+    private void GetMetadata()
+    {
+        if (_gameData != null) return;
+
+        // TODO call the DLsiteScrapper to get the metadata and assign it to _gameData
+    }
+
+    private List<MetadataField> GetAvailableFields()
+    {
+        if (_gameData == null) GetMetadata();
+
+        return new List<MetadataField>
         {
-            this.options = options;
-            this.plugin = plugin;
-        }
-
-        // Override additional methods based on supported metadata fields.
-        public override string GetDescription(GetMetadataFieldArgs args)
-        {
-            return options.GameData.Name + " description";
-        }
+            MetadataField.Description,
+            MetadataField.Name
+        };
     }
 }
