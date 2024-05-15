@@ -1,5 +1,4 @@
-﻿<!-- PROJECT LOGO -->
-<br />
+﻿<br />
 <div align="center">
   <a href="https://github.com/Mysterken/DLsiteMetadata">
     <img src="Resources/icon.png" alt="Logo" width="256" height="256">
@@ -14,7 +13,7 @@
 
 ### Installation
 
-For now you will have to pack the extension yourself, you can do so by following the instructions on the [Playnite documentation](https://api.playnite.link/docs/tutorials/toolbox.html#packing-extensions)
+For now, you will have to pack the extension yourself, you can do so by following the instructions on the [Playnite documentation](https://api.playnite.link/docs/tutorials/toolbox.html#packing-extensions)
 
 ## Usage
 
@@ -47,14 +46,12 @@ You can configure the plugin by going to the plugin settings and setting the fol
 | Include Voice Actors as Developers     | No                         | This will include Voice Actors in the Developers field in Playnite     |
 | Max Search Results                     | 30                         | Maximum amount of search results that should appear                    |
 
-<!-- ROADMAP -->
 ## Roadmap
 
 - [ ] Add the possibility to fetch metadata from every category at once
 - [ ] Automatic .pext packaging at every release
 - [ ] Add tests
 
-<!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
 * [erri120's Playnite.Extensions](https://github.com/erri120/Playnite.Extensions)
