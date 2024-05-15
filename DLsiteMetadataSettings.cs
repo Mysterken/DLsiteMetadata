@@ -6,29 +6,127 @@ namespace DLsiteMetadata;
 
 public class DLsiteMetadataSettings : ObservableObject
 {
-    private string _option1 = string.Empty;
-    private bool _option2;
-    private bool _optionThatWontBeSaved;
+    
+    // _searchCategory
+    private string _searchCategory = "Adult Doujin / Indie Games";
+    private string _pageLanguage = "English";
+    private bool _includeIllustrators = false;
+    private bool _includeScenarioWriters = false;
+    private bool _includeMusicCreators = false;
+    private bool _includeVoiceActors = false;
 
-    public string Option1
-    {
-        get => _option1;
-        set => SetValue(ref _option1, value);
-    }
-
-    public bool Option2
-    {
-        get => _option2;
-        set => SetValue(ref _option2, value);
-    }
-
-    // Playnite serializes settings object to a JSON object and saves it as text file.
-    // If you want to exclude some property from being saved then use `JsonDontSerialize` ignore attribute.
+    private int _maxSearchResults = 30;
+    
     [DontSerialize]
-    public bool OptionThatWontBeSaved
+    public List<string> AvailableSearchCategory { get; } =
+    [
+        "All ages Doujin / Indie Games",
+        "All ages PC Games",
+        "Adult Doujin / Indie Games",
+        "Adult H Games"
+    ];
+
+    [DontSerialize]
+    public List<int> MaxSearchResultsSteps { get; } =
+    [
+        30,
+        50,
+        100
+    ];
+
+    [DontSerialize]
+    public List<string> AvailableLanguages { get; } =
+    [
+        "Japanese",
+        "English",
+        "Simplified Chinese",
+        "Traditional Chinese",
+        "Korean",
+        "Spanish",
+        "German",
+        "French",
+        "Indonesian",
+        "Italian",
+        "Portuguese",
+        "Swedish",
+        "Thai",
+        "Vietnamese"
+    ];
+    
+    public SupportedLanguages GetSupportedLanguage()
     {
-        get => _optionThatWontBeSaved;
-        set => SetValue(ref _optionThatWontBeSaved, value);
+        return _pageLanguage switch
+        {
+            "Japanese" => SupportedLanguages.ja_JP,
+            "English" => SupportedLanguages.en_US,
+            "Simplified Chinese" => SupportedLanguages.zh_CN,
+            "Traditional Chinese" => SupportedLanguages.zh_TW,
+            "Korean" => SupportedLanguages.ko_KR,
+            "Spanish" => SupportedLanguages.es_ES,
+            "German" => SupportedLanguages.de_DE,
+            "French" => SupportedLanguages.fr_FR,
+            "Indonesian" => SupportedLanguages.id_ID,
+            "Italian" => SupportedLanguages.it_IT,
+            "Portuguese" => SupportedLanguages.pt_BR,
+            "Swedish" => SupportedLanguages.sv_SE,
+            "Thai" => SupportedLanguages.th_TH,
+            "Vietnamese" => SupportedLanguages.vi_VN,
+            _ => SupportedLanguages.en_US
+        };
+    }
+    
+    public string GetSearchCategoryPath()
+    {
+        return _searchCategory switch
+        {
+            "All ages Doujin / Indie Games" => "/home/",
+            "All ages PC Games" => "/soft/",
+            "Adult Doujin / Indie Games" => "/maniax/",
+            "Adult H Games" => "/pro/",
+            _ => "/home/"
+        };
+    }
+    
+    public string SearchCategory
+    {
+        get => _searchCategory;
+        set => SetValue(ref _searchCategory, value);
+    }
+    
+    public string PageLanguage
+    {
+        get => _pageLanguage;
+        set => SetValue(ref _pageLanguage, value);
+    }
+    
+    public bool IncludeIllustrators
+    {
+        get => _includeIllustrators;
+        set => SetValue(ref _includeIllustrators, value);
+    }
+    
+    public bool IncludeScenarioWriters
+    {
+        get => _includeScenarioWriters;
+        set => SetValue(ref _includeScenarioWriters, value);
+    }
+    
+    public bool IncludeMusicCreators
+    {
+        get => _includeMusicCreators;
+        set => SetValue(ref _includeMusicCreators, value);
+    }
+    
+    public bool IncludeVoiceActors
+    {
+        get => _includeVoiceActors;
+        set => SetValue(ref _includeVoiceActors, value);
+    }
+    
+    public int MaxSearchResults
+    {
+        get => _maxSearchResults;
+        set => SetValue(ref _maxSearchResults, value);
     }
 }
 
@@ -88,6 +186,22 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
         // Executed before EndEdit is called and EndEdit is not called if false is returned.
         // List of errors is presented to user if verification fails.
         errors = new List<string>();
+        
+        if (!Settings.AvailableSearchCategory.Contains(Settings.SearchCategory))
+        {
+            errors.Add("Selected category is not supported.");
+        }
+
+        if (!Settings.AvailableLanguages.Contains(Settings.PageLanguage))
+        {
+            errors.Add("Selected language is not supported.");
+        }
+
+        if (!Settings.MaxSearchResultsSteps.Contains(Settings.MaxSearchResults))
+        {
+            errors.Add("Selected search results is not in the list of steps.");
+        }
+
         return true;
     }
 }

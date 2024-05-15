@@ -10,10 +10,11 @@ namespace DLsiteMetadata;
 [UsedImplicitly]
 public class DLsiteMetadataPlugin : MetadataPlugin
 {
-    private static readonly ILogger Logger = LogManager.GetLogger();
+    private readonly IPlayniteAPI _playniteApi;
 
     public DLsiteMetadataPlugin(IPlayniteAPI api) : base(api)
     {
+        _playniteApi = api;
         Settings = new DLsiteMetadataSettingsViewModel(this);
         Properties = new MetadataPluginProperties
         {
@@ -25,18 +26,27 @@ public class DLsiteMetadataPlugin : MetadataPlugin
 
     public override Guid Id { get; } = Guid.Parse("db03c8d9-645a-4359-aafb-01cda945f301");
 
-    public override List<MetadataField> SupportedFields { get; } = new()
-    {
-        MetadataField.Description
-        // Include addition fields if supported by the metadata source
-    };
+    public override List<MetadataField> SupportedFields { get; } =
+    [
+        MetadataField.Name,
+        MetadataField.AgeRating,
+        MetadataField.Description,
+        MetadataField.Genres,
+        MetadataField.Developers,
+        MetadataField.Links,
+        MetadataField.CommunityScore,
+        MetadataField.CommunityScore,
+        MetadataField.ReleaseDate,
+        MetadataField.Series,
+        MetadataField.CoverImage,
+        MetadataField.BackgroundImage
+    ];
 
-    // Change to something more appropriate
     public override string Name => "DLsite";
 
     public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)
     {
-        return new DLsiteMetadataProvider(options, this);
+        return new DLsiteMetadataProvider(_playniteApi, options, Settings.Settings);
     }
 
     public override ISettings GetSettings(bool firstRunSettings)
