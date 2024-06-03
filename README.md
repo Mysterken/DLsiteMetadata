@@ -13,7 +13,7 @@
 
 ### Installation
 
-For now, you will have to pack the extension yourself, you can do so by following the instructions on the [Playnite documentation](https://api.playnite.link/docs/tutorials/toolbox.html#packing-extensions)
+1. Download and install the latest release from the [releases page](https://github.com/Mysterken/DLsiteMetadata/releases/tag/latest).
 
 ## Usage
 
