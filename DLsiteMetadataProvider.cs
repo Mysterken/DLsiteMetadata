@@ -207,7 +207,8 @@ public class DLsiteMetadataProvider(
     {
         if (_gameData != null) return;
 
-        var dlsiteLink = options.GameData.Links.FirstOrDefault(link => link.Name == "DLsite")?.Url;
+        var dlsiteLink = options.GameData?.Links.FirstOrDefault(link => link.Name == "DLsite")?.Url;
+        var gameName = options.GameData?.Name;
 
         var isValidUrl = dlsiteLink != null && DLsiteScrapper.IsValidUrl(dlsiteLink);
 
@@ -215,7 +216,6 @@ public class DLsiteMetadataProvider(
 
         if (!isValidUrl)
         {
-
             var selectedGame = (DLsiteItemOption)playniteApi.Dialogs.ChooseItemWithSearch(
                 null,
                 query =>
@@ -242,8 +242,8 @@ public class DLsiteMetadataProvider(
                             game => new DLsiteItemOption(game.Title, game.Excerpt, game.Link)
                         ).ToList()
                     ];
-                }, options.GameData.Name, "Search DLsite");
-            
+                }, gameName, "Search DLsite");
+
             if (selectedGame == null) return;
 
             dlsiteLink = selectedGame.Link;
@@ -251,16 +251,26 @@ public class DLsiteMetadataProvider(
 
         if (dlsiteLink == null)
         {
-            Logger.Warn($"No DLsite link found for {options.GameData.Name}");
+            Logger.Warn($"No DLsite link found for {gameName}");
             return;
         }
 
-        var gameTask = scrapper.ScrapGamePage(dlsiteLink, settings.GetSupportedLanguage());
-        gameTask.Wait();
+        try
+        {
+            var gameTask = scrapper.ScrapGamePage(dlsiteLink, settings.GetSupportedLanguage());
+            gameTask.Wait();
 
-        _gameData = gameTask.Result;
+            _gameData = gameTask.Result;
 
-        if (_gameData == null) Logger.Warn($"Failed to get metadata for {options.GameData.Name}");
+            if (_gameData == null) Logger.Warn($"Failed to get metadata for {gameName ?? "the selected game"}");
+        }
+        catch (Exception)
+        {
+            playniteApi.Dialogs.ShowErrorMessage(
+                $"Failed to fetch metadata from DLsite for {gameName ?? "the selected game"}",
+                "DLsiteMetadata Error"
+            );
+        }
     }
 
     private List<MetadataField> GetAvailableFields()

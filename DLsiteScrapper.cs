@@ -44,7 +44,17 @@ public class DLsiteScrapper(ILogger logger)
         };
 
         var client = new HttpClient();
-        var responseBody = await client.GetStringAsync(url);
+        string responseBody;
+        
+        try 
+        {
+            responseBody = await client.GetStringAsync(url);
+        }
+        catch (HttpRequestException e)
+        {
+            logger.Error(e, $"Failed to fetch URL: {url}");
+            throw;
+        }
 
         var context = BrowsingContext.New(Configuration.Default);
         var document = await context.OpenAsync(req => req.Content(responseBody));
