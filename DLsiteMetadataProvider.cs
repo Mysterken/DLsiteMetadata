@@ -207,7 +207,9 @@ public class DLsiteMetadataProvider(
     {
         if (_gameData != null) return;
 
-        var dlsiteLink = options.GameData?.Links.FirstOrDefault(link => link.Name == "DLsite")?.Url;
+        var dlsiteLink = options.GameData.Links?.FirstOrDefault(
+            link => link.Name.Equals("DLsite", StringComparison.OrdinalIgnoreCase)
+        )?.Url;
         var gameName = options.GameData?.Name;
 
         var isValidUrl = dlsiteLink != null && DLsiteScrapper.IsValidUrl(dlsiteLink);
