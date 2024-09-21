@@ -5,3 +5,6 @@ Version: 1.0.2
 Module: DLsiteMetadata.dll
 Type: MetadataProvider
 Icon: Resources\icon.png
+Links:
+  - Name: GitHub
+    Url: https://github.com/Mysterken/DLsiteMetadata

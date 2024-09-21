@@ -183,7 +183,7 @@ public class DLsiteScrapper(ILogger logger)
 
                     if (TranslationDictionary.AllAges[language].Contains(ageRating))
                         result.Age = DLsiteScrapperResult.AgeRating.AllAges;
-                    else if (ageRating == "R-15")
+                    else if (TranslationDictionary.R15[language].Contains(ageRating))
                         result.Age = DLsiteScrapperResult.AgeRating.RRated;
                     else if (TranslationDictionary.Adult[language].Contains(ageRating))
                         result.Age = DLsiteScrapperResult.AgeRating.Adult;
