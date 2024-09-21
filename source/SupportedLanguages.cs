@@ -149,7 +149,7 @@ public static class TranslationDictionary
         { SupportedLanguages.th_TH, "ดนตรี" },
         { SupportedLanguages.vi_VN, "Âm nhạc" }
     };
-    
+
     public static readonly Dictionary<SupportedLanguages, string> Author = new()
     {
         { SupportedLanguages.ja_JP, "作者" },
@@ -167,7 +167,7 @@ public static class TranslationDictionary
         { SupportedLanguages.th_TH, "ผู้เขียน" },
         { SupportedLanguages.vi_VN, "Tác giả" }
     };
-    
+
     public static readonly Dictionary<SupportedLanguages, string> Age = new()
     {
         { SupportedLanguages.ja_JP, "年齢指定" },
@@ -203,7 +203,7 @@ public static class TranslationDictionary
         { SupportedLanguages.th_TH, "อื่น ๆ" },
         { SupportedLanguages.vi_VN, "Loại khác" }
     };
-    
+
     public static readonly Dictionary<SupportedLanguages, string> Genre = new()
     {
         { SupportedLanguages.ja_JP, "ジャンル" },
@@ -257,22 +257,40 @@ public static class TranslationDictionary
         { SupportedLanguages.th_TH, "ทุกวัย" },
         { SupportedLanguages.vi_VN, "Tất cả độ tuổi" }
     };
-    
+
+    public static readonly Dictionary<SupportedLanguages, string> R15 = new()
+    {
+        { SupportedLanguages.ja_JP, "R-15" },
+        { SupportedLanguages.en_US, "R-15" },
+        { SupportedLanguages.zh_CN, "R-15" },
+        { SupportedLanguages.zh_TW, "R-15" },
+        { SupportedLanguages.ko_KR, "R-15" },
+        { SupportedLanguages.es_ES, "R-15" },
+        { SupportedLanguages.de_DE, "R-15" },
+        { SupportedLanguages.fr_FR, "R-15" },
+        { SupportedLanguages.id_ID, "R-15" },
+        { SupportedLanguages.it_IT, "Ragazzi 15+" },
+        { SupportedLanguages.pt_BR, "R-15" },
+        { SupportedLanguages.sv_SE, "R-15" },
+        { SupportedLanguages.th_TH, "R-15" },
+        { SupportedLanguages.vi_VN, "R-15" }
+    };
+
     public static readonly Dictionary<SupportedLanguages, string> Adult = new()
     {
-        { SupportedLanguages.ja_JP, "18禁" },
-        { SupportedLanguages.en_US, "18+" },
-        { SupportedLanguages.zh_CN, "18禁" },
-        { SupportedLanguages.zh_TW, "18禁" },
-        { SupportedLanguages.ko_KR, "성인" },
-        { SupportedLanguages.es_ES, "18+" },
-        { SupportedLanguages.de_DE, "18+" },
-        { SupportedLanguages.fr_FR, "+18" },
-        { SupportedLanguages.id_ID, "18+" },
-        { SupportedLanguages.it_IT, "Adulti 18+" },
-        { SupportedLanguages.pt_BR, "18+" },
-        { SupportedLanguages.sv_SE, "18+" },
-        { SupportedLanguages.th_TH, "18+" },
-        { SupportedLanguages.vi_VN, "18+" }
+        { SupportedLanguages.ja_JP, "R18" },
+        { SupportedLanguages.en_US, "R18" },
+        { SupportedLanguages.zh_CN, "R18" },
+        { SupportedLanguages.zh_TW, "R18" },
+        { SupportedLanguages.ko_KR, "R18" },
+        { SupportedLanguages.es_ES, "R18" },
+        { SupportedLanguages.de_DE, "R18" },
+        { SupportedLanguages.fr_FR, "R18" },
+        { SupportedLanguages.id_ID, "R18" },
+        { SupportedLanguages.it_IT, "18+" },
+        { SupportedLanguages.pt_BR, "R18" },
+        { SupportedLanguages.sv_SE, "R18" },
+        { SupportedLanguages.th_TH, "R18" },
+        { SupportedLanguages.vi_VN, "R18" }
     };
 }

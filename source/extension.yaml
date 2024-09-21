@@ -1,0 +1,10 @@
+﻿Id: DLsiteMetadata
+Name: DLsite Metadata Provider
+Author: Mysterken
+Version: 1.1
+Module: DLsiteMetadata.dll
+Type: MetadataProvider
+Icon: Resources\DLsiteLogo.png
+Links:
+  - Name: GitHub
+    Url: https://github.com/Mysterken/DLsiteMetadata

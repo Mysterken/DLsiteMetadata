@@ -6,6 +6,13 @@ namespace DLsiteMetadata;
 
 public class DLsiteScrapperResult
 {
+    public enum AgeRating
+    {
+        AllAges,
+        RRated,
+        Adult
+    }
+
     [CanBeNull] public AgeRating? Age { get; set; }
     [CanBeNull] public string Author { get; set; }
     [CanBeNull] public string Circle { get; set; }
@@ -26,13 +33,6 @@ public class DLsiteScrapperResult
     [CanBeNull] public string Title { get; set; }
     [CanBeNull] public string UpdateDate { get; set; }
     [CanBeNull] public List<string> VoiceActors { get; set; }
-    
-    public enum AgeRating
-    {
-        AllAges,
-        RRated,
-        Adult
-    }
 }
 
 public class DLsiteSearchResult

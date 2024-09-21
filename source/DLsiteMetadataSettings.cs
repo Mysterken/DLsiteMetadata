@@ -6,20 +6,20 @@ namespace DLsiteMetadata;
 
 public class DLsiteMetadataSettings : ObservableObject
 {
-    
-    // _searchCategory
-    private string _searchCategory = "Adult Doujin / Indie Games";
-    private string _pageLanguage = "English";
-    private bool _includeIllustrators = false;
-    private bool _includeScenarioWriters = false;
-    private bool _includeMusicCreators = false;
-    private bool _includeVoiceActors = false;
+    private bool _includeIllustrators;
+    private bool _includeMusicCreators;
+    private bool _includeScenarioWriters;
+    private bool _includeVoiceActors;
 
     private int _maxSearchResults = 30;
-    
+    private string _pageLanguage = "English";
+
+    private string _searchCategory = "All categories";
+
     [DontSerialize]
     public List<string> AvailableSearchCategory { get; } =
     [
+        "All categories",
         "All ages Doujin / Indie Games",
         "All ages PC Games",
         "Adult Doujin / Indie Games",
@@ -52,7 +52,49 @@ public class DLsiteMetadataSettings : ObservableObject
         "Thai",
         "Vietnamese"
     ];
-    
+
+    public string SearchCategory
+    {
+        get => _searchCategory;
+        set => SetValue(ref _searchCategory, value);
+    }
+
+    public string PageLanguage
+    {
+        get => _pageLanguage;
+        set => SetValue(ref _pageLanguage, value);
+    }
+
+    public bool IncludeIllustrators
+    {
+        get => _includeIllustrators;
+        set => SetValue(ref _includeIllustrators, value);
+    }
+
+    public bool IncludeScenarioWriters
+    {
+        get => _includeScenarioWriters;
+        set => SetValue(ref _includeScenarioWriters, value);
+    }
+
+    public bool IncludeMusicCreators
+    {
+        get => _includeMusicCreators;
+        set => SetValue(ref _includeMusicCreators, value);
+    }
+
+    public bool IncludeVoiceActors
+    {
+        get => _includeVoiceActors;
+        set => SetValue(ref _includeVoiceActors, value);
+    }
+
+    public int MaxSearchResults
+    {
+        get => _maxSearchResults;
+        set => SetValue(ref _maxSearchResults, value);
+    }
+
     public SupportedLanguages GetSupportedLanguage()
     {
         return _pageLanguage switch
@@ -74,59 +116,22 @@ public class DLsiteMetadataSettings : ObservableObject
             _ => SupportedLanguages.en_US
         };
     }
-    
-    public string GetSearchCategoryPath()
+
+    public List<string> GetAvailableSearchCategory()
     {
-        return _searchCategory switch
+        return AvailableSearchCategory;
+    }
+
+    public static string GetSearchCategoryPath(string searchCategory)
+    {
+        return searchCategory switch
         {
-            "All ages Doujin / Indie Games" => "/home/",
-            "All ages PC Games" => "/soft/",
-            "Adult Doujin / Indie Games" => "/maniax/",
-            "Adult H Games" => "/pro/",
-            _ => "/home/"
+            "All ages Doujin / Indie Games" => "home",
+            "All ages PC Games" => "soft",
+            "Adult Doujin / Indie Games" => "maniax",
+            "Adult H Games" => "pro",
+            _ => "home"
         };
-    }
-    
-    public string SearchCategory
-    {
-        get => _searchCategory;
-        set => SetValue(ref _searchCategory, value);
-    }
-    
-    public string PageLanguage
-    {
-        get => _pageLanguage;
-        set => SetValue(ref _pageLanguage, value);
-    }
-    
-    public bool IncludeIllustrators
-    {
-        get => _includeIllustrators;
-        set => SetValue(ref _includeIllustrators, value);
-    }
-    
-    public bool IncludeScenarioWriters
-    {
-        get => _includeScenarioWriters;
-        set => SetValue(ref _includeScenarioWriters, value);
-    }
-    
-    public bool IncludeMusicCreators
-    {
-        get => _includeMusicCreators;
-        set => SetValue(ref _includeMusicCreators, value);
-    }
-    
-    public bool IncludeVoiceActors
-    {
-        get => _includeVoiceActors;
-        set => SetValue(ref _includeVoiceActors, value);
-    }
-    
-    public int MaxSearchResults
-    {
-        get => _maxSearchResults;
-        set => SetValue(ref _maxSearchResults, value);
     }
 }
 
@@ -186,21 +191,15 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
         // Executed before EndEdit is called and EndEdit is not called if false is returned.
         // List of errors is presented to user if verification fails.
         errors = new List<string>();
-        
+
         if (!Settings.AvailableSearchCategory.Contains(Settings.SearchCategory))
-        {
             errors.Add("Selected category is not supported.");
-        }
 
         if (!Settings.AvailableLanguages.Contains(Settings.PageLanguage))
-        {
             errors.Add("Selected language is not supported.");
-        }
 
         if (!Settings.MaxSearchResultsSteps.Contains(Settings.MaxSearchResults))
-        {
             errors.Add("Selected search results is not in the list of steps.");
-        }
 
         return true;
     }
