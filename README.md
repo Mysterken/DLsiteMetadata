@@ -9,6 +9,12 @@
   <p align="center">
     Playnite metadata plugin that fetch from DLsite 
   </p>
+
+[![CodeFactor](https://www.codefactor.io/repository/github/mysterken/dlsitemetadata/badge)](https://www.codefactor.io/repository/github/mysterken/dlsitemetadata)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Mysterken/DLsiteMetadata)](https://github.com/Mysterken/DLsiteMetadata/releases/latest)
+![Language](https://img.shields.io/github/languages/top/Mysterken/DLsiteMetadata)
+[![GitHub](https://img.shields.io/github/license/Mysterken/DLsiteMetadata)](https://github.com/Mysterken/DLsiteMetadata/blob/master/LICENSE)  
+![GitHub stars](https://img.shields.io/github/stars/Mysterken/DLsiteMetadata?style=social)
 </div>
 
 ### Installation
