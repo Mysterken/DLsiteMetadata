@@ -235,10 +235,19 @@ public class DLsiteScrapper(ILogger logger)
         SupportedLanguages language = DefaultLanguage
     )
     {
-        var searchUrl = string.Format(SearchFormatUrl, searchCategory, query, maxSearchResults, language.ToString());
+        var searchUrl = searchCategory switch
+        {
+            "/maniax/" => "{0}fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/doujin/work_category[1]/books/work_category[2]/pc/work_category[3]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+            "/home/" => "{0}fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+            "/soft/" => "{0}fsr/=/language/jp/keyword/{1}/age_category[0]/general/order[0]/trend/options_and_or/and/per_page/{2}/from/fs.header/?locale={3}",
+            "/pro/" => "{0}fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/pc/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+            _ => "{0}fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+        };
+        
+        searchUrl = string.Format(searchUrl, searchCategory, query, maxSearchResults, language.ToString());
 
         var client = new HttpClient();
-        var responseBody = await client.GetStringAsync(searchUrl);
+        var responseBody = await client.GetStringAsync(SiteBaseUrl + searchUrl);
 
         var context = BrowsingContext.New(Configuration.Default);
         var document = await context.OpenAsync(req => req.Content(responseBody));
