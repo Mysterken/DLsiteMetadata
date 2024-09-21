@@ -97,6 +97,9 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Include="packages.config"/>
+        <None Include="Resources\DLsiteLogo.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <None Include="Localization\*.xaml">
