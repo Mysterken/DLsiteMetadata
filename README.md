@@ -32,6 +32,15 @@ Supported [fields](https://api.playnite.link/docs/api/Playnite.SDK.Plugins.Metad
 - Release Date
 - Series
 
+### Getting metadata directly from the game page
+
+If you can't find the game you're looking for in the search results, you can get the metadata directly from the game page by giving either the game's URL or the game's ID.   
+To do this, you need to add a new link to the game with the name `dlsite` and the URL or ID as the link's URL.
+
+#### Example
+
+<img src="documentation/addLinkGuide.jpg" alt="Logo">
+
 ### Configuration
 
 You can configure the plugin by going to the plugin settings and setting the following values:
