@@ -1,7 +1,7 @@
 ﻿<br />
 <div align="center">
   <a href="https://github.com/Mysterken/DLsiteMetadata">
-    <img src="source/Resources/icon.png" alt="Logo" width="256" height="256">
+    <img src="documentation/icon.png" alt="Logo" width="256" height="256">
   </a>
 
 <h3 align="center">DLsiteMetadata</h3>
@@ -34,8 +34,8 @@ Supported [fields](https://api.playnite.link/docs/api/Playnite.SDK.Plugins.Metad
 
 ### Getting metadata directly from the game page
 
-If you can't find the game you're looking for in the search results, you can get the metadata directly from the game page by giving either the game's URL or the game's ID.   
-To do this, you need to add a new link to the game with the name `dlsite` and the URL or ID as the link's URL.
+If you can't find the game you're looking for in the search results, you can get the metadata directly from the game page by giving the game's URL.   
+To do this, you need to add a new link to the game with the name `dlsite` and the link's URL.
 
 #### Example
 
@@ -45,15 +45,15 @@ To do this, you need to add a new link to the game with the name `dlsite` and th
 
 You can configure the plugin by going to the plugin settings and setting the following values:
 
-| Name                                   | Default value              | Description                                                            |
-|----------------------------------------|----------------------------|------------------------------------------------------------------------|
-| Game category                          | Adult Doujin / Indie Games | What DLsite category should the plugin fetch from                      |
-| Page Language                          | English                    | The page locale language                                               |
-| Include Illustrators as Developers     | No                         | This will include Illustrators in the Developers field in Playnite     |
-| Include Scenario Writers as Developers | No                         | This will include Scenario Writers in the Developers field in Playnite |
-| Include Music Creators as Developers   | No                         | This will include Music Creators in the Developers field in Playnite   |
-| Include Voice Actors as Developers     | No                         | This will include Voice Actors in the Developers field in Playnite     |
-| Max Search Results                     | 30                         | Maximum amount of search results that should appear                    |
+| Name                                   | Default value  | Description                                                            |
+|----------------------------------------|----------------|------------------------------------------------------------------------|
+| Game category                          | All categories | What DLsite category should the plugin fetch from                      |
+| Page Language                          | English        | The page locale language                                               |
+| Include Illustrators as Developers     | No             | This will include Illustrators in the Developers field in Playnite     |
+| Include Scenario Writers as Developers | No             | This will include Scenario Writers in the Developers field in Playnite |
+| Include Music Creators as Developers   | No             | This will include Music Creators in the Developers field in Playnite   |
+| Include Voice Actors as Developers     | No             | This will include Voice Actors in the Developers field in Playnite     |
+| Max Search Results                     | 30             | Maximum amount of search results that should appear                    |
 
 ## Roadmap
 

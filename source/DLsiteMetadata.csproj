@@ -97,9 +97,6 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Include="packages.config"/>
-        <None Include="Resources\icon.png">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
     </ItemGroup>
     <ItemGroup>
         <None Include="Localization\*.xaml">
@@ -121,6 +118,7 @@
     </ItemGroup>
     <ItemGroup>
         <Folder Include="obj\"/>
+        <Folder Include="Resources\" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>
