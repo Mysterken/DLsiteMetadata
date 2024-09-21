@@ -126,11 +126,11 @@ public class DLsiteMetadataSettings : ObservableObject
     {
         return searchCategory switch
         {
-            "All ages Doujin / Indie Games" => "/home/",
-            "All ages PC Games" => "/soft/",
-            "Adult Doujin / Indie Games" => "/maniax/",
-            "Adult H Games" => "/pro/",
-            _ => "/home/"
+            "All ages Doujin / Indie Games" => "home",
+            "All ages PC Games" => "soft",
+            "Adult Doujin / Indie Games" => "maniax",
+            "Adult H Games" => "pro",
+            _ => "home"
         };
     }
 }

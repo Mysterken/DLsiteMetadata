@@ -239,7 +239,17 @@ public class DLsiteMetadataProvider(
 
                         searchResults.Wait();
 
-                        searchResult.AddRange(searchResults.Result.SelectMany(x => x));
+                        searchResults.Result
+                            .SelectMany(x => x)
+                            .ToList()
+                            .ForEach(game =>
+                            {
+                                var source = game.Link.Replace(DLsiteScrapper.SiteBaseUrl, "").Split('/');
+                                var addExcerpt = source.Length > 0 ? source[0] : "Unknown source";
+
+                                game.Excerpt += $"\n(From {addExcerpt})";
+                                searchResult.Add(game);
+                            });
                     }
                     else
                     {

@@ -16,7 +16,7 @@ public class DLsiteScrapper(ILogger logger)
 {
     private const SupportedLanguages DefaultLanguage = SupportedLanguages.en_US;
 
-    public const string SiteBaseUrl = "https://www.dlsite.com";
+    public const string SiteBaseUrl = "https://www.dlsite.com/";
 
     public async Task<DLsiteScrapperResult> ScrapGamePage(string url, SupportedLanguages language = DefaultLanguage)
     {
@@ -230,16 +230,16 @@ public class DLsiteScrapper(ILogger logger)
     {
         var searchUrl = searchCategory switch
         {
-            "/maniax/" =>
-                "{0}fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/doujin/work_category[1]/books/work_category[2]/pc/work_category[3]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
-            "/home/" =>
-                "{0}fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
-            "/soft/" =>
-                "{0}fsr/=/language/jp/keyword/{1}/age_category[0]/general/order[0]/trend/options_and_or/and/per_page/{2}/from/fs.header/?locale={3}",
-            "/pro/" =>
-                "{0}fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/pc/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+            "maniax" =>
+                "{0}/fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/doujin/work_category[1]/books/work_category[2]/pc/work_category[3]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+            "home" =>
+                "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+            "soft" =>
+                "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/order[0]/trend/options_and_or/and/per_page/{2}/from/fs.header/?locale={3}",
+            "pro" =>
+                "{0}/fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/pc/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
             _ =>
-                "{0}fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}"
+                "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}"
         };
 
         searchUrl = string.Format(searchUrl, searchCategory, query, maxSearchResults, language.ToString());
