@@ -1,7 +1,7 @@
 ﻿<br />
 <div align="center">
   <a href="https://github.com/Mysterken/DLsiteMetadata">
-    <img src="Resources/icon.png" alt="Logo" width="256" height="256">
+    <img src="source/Resources/icon.png" alt="Logo" width="256" height="256">
   </a>
 
 <h3 align="center">DLsiteMetadata</h3>
