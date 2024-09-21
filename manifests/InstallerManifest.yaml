@@ -3,7 +3,7 @@ Packages:
   - Version: 1.1
     RequiredApiVersion: 6.11.0
     ReleaseDate: 2024-09-21
-    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.1/DLsiteMetadata.pext
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.1/DLsiteMetadata_1_1.pext
     Changelog:
       - Add option to search from all categories at once
       - Update extension logo
