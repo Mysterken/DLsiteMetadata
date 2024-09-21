@@ -149,7 +149,7 @@ public static class TranslationDictionary
         { SupportedLanguages.th_TH, "ดนตรี" },
         { SupportedLanguages.vi_VN, "Âm nhạc" }
     };
-    
+
     public static readonly Dictionary<SupportedLanguages, string> Author = new()
     {
         { SupportedLanguages.ja_JP, "作者" },
@@ -167,7 +167,7 @@ public static class TranslationDictionary
         { SupportedLanguages.th_TH, "ผู้เขียน" },
         { SupportedLanguages.vi_VN, "Tác giả" }
     };
-    
+
     public static readonly Dictionary<SupportedLanguages, string> Age = new()
     {
         { SupportedLanguages.ja_JP, "年齢指定" },
@@ -203,7 +203,7 @@ public static class TranslationDictionary
         { SupportedLanguages.th_TH, "อื่น ๆ" },
         { SupportedLanguages.vi_VN, "Loại khác" }
     };
-    
+
     public static readonly Dictionary<SupportedLanguages, string> Genre = new()
     {
         { SupportedLanguages.ja_JP, "ジャンル" },
@@ -257,7 +257,7 @@ public static class TranslationDictionary
         { SupportedLanguages.th_TH, "ทุกวัย" },
         { SupportedLanguages.vi_VN, "Tất cả độ tuổi" }
     };
-    
+
     public static readonly Dictionary<SupportedLanguages, string> R15 = new()
     {
         { SupportedLanguages.ja_JP, "R-15" },
@@ -275,7 +275,7 @@ public static class TranslationDictionary
         { SupportedLanguages.th_TH, "R-15" },
         { SupportedLanguages.vi_VN, "R-15" }
     };
-    
+
     public static readonly Dictionary<SupportedLanguages, string> Adult = new()
     {
         { SupportedLanguages.ja_JP, "R18" },

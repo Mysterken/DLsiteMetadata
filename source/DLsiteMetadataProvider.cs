@@ -223,9 +223,8 @@ public class DLsiteMetadataProvider(
                 null,
                 query =>
                 {
-
                     var searchResult = new List<DLsiteSearchResult>();
-                    
+
                     if (settings.SearchCategory == "All categories")
                     {
                         var searchTasks = settings.GetAvailableSearchCategory()
@@ -237,9 +236,9 @@ public class DLsiteMetadataProvider(
                             .ToList();
 
                         var searchResults = Task.WhenAll(searchTasks);
-                        
+
                         searchResults.Wait();
-                        
+
                         searchResult.AddRange(searchResults.Result.SelectMany(x => x));
                     }
                     else
