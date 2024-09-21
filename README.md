@@ -57,7 +57,7 @@ You can configure the plugin by going to the plugin settings and setting the fol
 
 ## Roadmap
 
-- [ ] Add the possibility to fetch metadata from every category at once
+- [x] Add the possibility to fetch metadata from every category at once
 - [ ] Automatic .pext packaging at every release
 - [ ] Add tests
 

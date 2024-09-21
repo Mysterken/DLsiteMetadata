@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
@@ -222,17 +223,39 @@ public class DLsiteMetadataProvider(
                 null,
                 query =>
                 {
-                    var searchTask = scrapper.ScrapSearchPage(
-                        settings.GetSearchCategoryPath(),
-                        query,
-                        settings.MaxSearchResults,
-                        settings.GetSupportedLanguage());
 
-                    searchTask.Wait();
+                    var searchResult = new List<DLsiteSearchResult>();
+                    
+                    if (settings.SearchCategory == "All categories")
+                    {
+                        var searchTasks = settings.GetAvailableSearchCategory()
+                            .Select(category => scrapper.ScrapSearchPage(
+                                DLsiteMetadataSettings.GetSearchCategoryPath(category),
+                                query,
+                                settings.MaxSearchResults,
+                                settings.GetSupportedLanguage()))
+                            .ToList();
 
-                    var searchResult = searchTask.Result;
+                        var searchResults = Task.WhenAll(searchTasks);
+                        
+                        searchResults.Wait();
+                        
+                        searchResult.AddRange(searchResults.Result.SelectMany(x => x));
+                    }
+                    else
+                    {
+                        var searchTask = scrapper.ScrapSearchPage(
+                            DLsiteMetadataSettings.GetSearchCategoryPath(settings.SearchCategory),
+                            query,
+                            settings.MaxSearchResults,
+                            settings.GetSupportedLanguage());
 
-                    if (searchResult == null || searchResult.Count == 0)
+                        searchTask.Wait();
+
+                        searchResult.AddRange(searchTask.Result);
+                    }
+
+                    if (searchResult.Count == 0)
                     {
                         Logger.Error($"No search results found for {options.GameData.Name}");
                         return null;

@@ -7,8 +7,7 @@ namespace DLsiteMetadata;
 public class DLsiteMetadataSettings : ObservableObject
 {
     
-    // _searchCategory
-    private string _searchCategory = "Adult Doujin / Indie Games";
+    private string _searchCategory = "All categories";
     private string _pageLanguage = "English";
     private bool _includeIllustrators = false;
     private bool _includeScenarioWriters = false;
@@ -20,6 +19,7 @@ public class DLsiteMetadataSettings : ObservableObject
     [DontSerialize]
     public List<string> AvailableSearchCategory { get; } =
     [
+        "All categories",
         "All ages Doujin / Indie Games",
         "All ages PC Games",
         "Adult Doujin / Indie Games",
@@ -75,9 +75,14 @@ public class DLsiteMetadataSettings : ObservableObject
         };
     }
     
-    public string GetSearchCategoryPath()
+    public List<string> GetAvailableSearchCategory()
     {
-        return _searchCategory switch
+        return AvailableSearchCategory;
+    }
+    
+    public static string GetSearchCategoryPath(string searchCategory)
+    {
+        return searchCategory switch
         {
             "All ages Doujin / Indie Games" => "/home/",
             "All ages PC Games" => "/soft/",
