@@ -64,6 +64,7 @@ You can configure the plugin by going to the plugin settings and setting the fol
 ## Roadmap
 
 - [x] Add the possibility to fetch metadata from every category at once
+- [ ] Fetch a game by its work ID instead of the full URL
 - [ ] Automatic .pext packaging at every release
 - [ ] Add tests
 
