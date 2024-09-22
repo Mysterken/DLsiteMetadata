@@ -19,7 +19,7 @@
 
 ### Installation
 
-1. Download and install the latest release from the [releases page](https://github.com/Mysterken/DLsiteMetadata/releases/tag/latest).
+1. Download and install the latest release from the [releases page](https://github.com/Mysterken/DLsiteMetadata/releases/latest).
 
 ## Usage
 
