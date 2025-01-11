@@ -1,12 +1,11 @@
 ﻿AddonId: DLsiteMetadata
 Packages:
-  - Version: 1.1
+  - Version: 1.11
     RequiredApiVersion: 6.11.0
-    ReleaseDate: 2024-09-21
-    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.1/DLsiteMetadata_1_1.pext
+    ReleaseDate: 2025-01-11
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.11/DLsiteMetadata_1_11.pext
     Changelog:
-      - Add option to search from all categories at once
-      - Update extension logo
-      - Update README.md
+      - Add search games directly by its ID instead of the full URL
+      - Fix no games found when a space is in the name
+      - Fix double request when searching with category "All categories"
       - Update dependencies
-      - Restructure and clean code

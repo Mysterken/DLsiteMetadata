@@ -41,7 +41,7 @@ Supported [fields](https://api.playnite.link/docs/api/Playnite.SDK.Plugins.Metad
 ### Getting metadata directly from the game page
 
 If you can't find the game you're looking for in the search results, you can get the metadata directly from the game page by giving the game's URL.   
-To do this, you need to add a new link to the game with the name `dlsite` and the link's URL.
+To do this, you need to add a new link to the game with the name `dlsite` and the link's URL or directly the work ID (RJ150726).
 
 #### Example
 
@@ -64,7 +64,7 @@ You can configure the plugin by going to the plugin settings and setting the fol
 ## Roadmap
 
 - [x] Add the possibility to fetch metadata from every category at once
-- [ ] Fetch a game by its work ID instead of the full URL
+- [x] Fetch a game by its work ID instead of the full URL
 - [ ] Automatic .pext packaging at every release
 - [ ] Add tests
 

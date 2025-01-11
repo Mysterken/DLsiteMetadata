@@ -219,6 +219,8 @@ public class DLsiteMetadataProvider(
 
         if (!isValidUrl)
         {
+            var defaultSearch = dlsiteLink != null && DLsiteScrapper.IsValidId(dlsiteLink) ? dlsiteLink : gameName;
+            
             var selectedGame = (DLsiteItemOption)playniteApi.Dialogs.ChooseItemWithSearch(
                 null,
                 query =>
@@ -228,6 +230,7 @@ public class DLsiteMetadataProvider(
                     if (settings.SearchCategory == "All categories")
                     {
                         var searchTasks = settings.GetAvailableSearchCategory()
+                            .Where(category => category != "All categories")
                             .Select(category => scrapper.ScrapSearchPage(
                                 DLsiteMetadataSettings.GetSearchCategoryPath(category),
                                 query,
@@ -276,7 +279,7 @@ public class DLsiteMetadataProvider(
                             game => new DLsiteItemOption(game.Title, game.Excerpt, game.Link)
                         ).ToList()
                     ];
-                }, gameName, "Search DLsite");
+                }, defaultSearch, "Search DLsite");
 
             if (selectedGame == null) return;
 
