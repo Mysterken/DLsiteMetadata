@@ -228,6 +228,7 @@ public class DLsiteMetadataProvider(
                     if (settings.SearchCategory == "All categories")
                     {
                         var searchTasks = settings.GetAvailableSearchCategory()
+                            .Where(category => category != "All categories")
                             .Select(category => scrapper.ScrapSearchPage(
                                 DLsiteMetadataSettings.GetSearchCategoryPath(category),
                                 query,
