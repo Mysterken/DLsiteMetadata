@@ -295,4 +295,10 @@ public class DLsiteScrapper(ILogger logger)
             @"https://www\.dlsite\.com/(home|soft|maniax|pro)/work/=/product_id/(RJ|BJ|VJ)(\d{6}|\d{8})\.html");
         return match.Success;
     }
+    
+    public static bool IsValidId(string id)
+    {
+        var match = Regex.Match(id, @"(RJ|BJ|VJ)(\d{6}|\d{8})$");
+        return match.Success;
+    }
 }
