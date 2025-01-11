@@ -242,6 +242,8 @@ public class DLsiteScrapper(ILogger logger)
                 "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}"
         };
 
+        query = query.Replace(" ", "+");
+
         searchUrl = string.Format(searchUrl, searchCategory, query, maxSearchResults, language.ToString());
 
         var client = new HttpClient();
