@@ -287,7 +287,8 @@ public class DLsiteMetadataProvider(
 
         try
         {
-            var url = IsValidUrl(dlsiteLink) ? dlsiteLink : $"https://www.dlsite.com/home/work/=/product_id/{gameName}.html";
+            var link = dlsiteLink ?? gameName;
+            var url = IsValidUrl(link) ? link : $"https://www.dlsite.com/home/work/=/product_id/{gameName}.html";
 
             var gameTask = scrapper.ScrapGamePage(url, settings.GetSupportedLanguage());
             gameTask.Wait();
