@@ -24,7 +24,7 @@
 ## Usage
 
 Supported [fields](https://api.playnite.link/docs/api/Playnite.SDK.Plugins.MetadataField.html):
-- Age rating
+- Age Rating
 - Background Image
 - Community Score
 - Cover Image
