@@ -1,7 +1,7 @@
 ﻿Id: DLsiteMetadata
 Name: DLsite Metadata Provider
 Author: Mysterken
-Version: 1.11
+Version: 1.12
 Module: DLsiteMetadata.dll
 Type: MetadataProvider
 Icon: Resources\DLsiteLogo.png

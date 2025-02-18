@@ -1,5 +1,14 @@
-﻿AddonId: DLsiteMetadata
+﻿AddonId: 'DLsiteMetadata'
 Packages:
+  - Version: 1.12
+    RequiredApiVersion: 6.11.0
+    ReleaseDate: 2025-02-18
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.12/DLsiteMetadata_1_12.pext
+    Changelog:
+      - Support RE work id for compatibility
+      - Skip search if the game name is work id or link
+      - Update installer manifest
+      - Upgrade dependencies
   - Version: 1.11
     RequiredApiVersion: 6.11.0
     ReleaseDate: 2025-01-11
@@ -9,3 +18,34 @@ Packages:
       - Fix no games found when a space is in the name
       - Fix double request when searching with category "All categories"
       - Update dependencies
+  - Version: 1.1
+    RequiredApiVersion: 6.11.0
+    ReleaseDate: 2024-09-21
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.1/DLsiteMetadata_1_1.pext
+    Changelog:
+      - Add option to search from all categories at once
+      - Update extension logo
+      - Update README.md
+      - Update dependencies
+      - Restructure and clean code
+  - Version: 1.0.2
+    RequiredApiVersion: 6.11.0
+    ReleaseDate: 2024-09-21
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.0.2/DLsiteMetadata_db03c8d9-645a-4359-aafb-01cda945f301_1_0_2.pext
+    Changelog:
+      - Fix game search by title 
+  - Version: 1.0.1
+    RequiredApiVersion: 6.11.0
+    ReleaseDate: 2024-06-04
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.0.1/DLsiteMetadata_db03c8d9-645a-4359-aafb-01cda945f301_1_0_1.pext
+    Changelog:
+      - Fix missing value
+      - Add more logs for debugging purpose
+      - Open an error window if the plugin can't access URL while fetching
+      - Removed local build from stack trace
+  - Version: 1.0
+    RequiredApiVersion: 6.11.0
+    ReleaseDate: 2024-06-03
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.0.0/DLsiteMetadata_db03c8d9-645a-4359-aafb-01cda945f301_1_0.pext
+    Changelog:
+      - Initial release

@@ -17,37 +17,32 @@ public class DLsiteScrapper(ILogger logger)
     private const SupportedLanguages DefaultLanguage = SupportedLanguages.en_US;
 
     public const string SiteBaseUrl = "https://www.dlsite.com/";
+    private readonly HttpClient _httpClient = new();
 
     public async Task<DLsiteScrapperResult> ScrapGamePage(string url, SupportedLanguages language = DefaultLanguage)
     {
-        if (!IsValidUrl(url))
-        {
-            logger.Error($"Invalid URL: {url}");
-            return null;
-        }
-
         if (!url.Contains("?locale=")) url += $"?locale={language.ToString()}";
 
         var result = new DLsiteScrapperResult
         {
-            Links = new Dictionary<string, string>
-            {
-                { "DLsite", url }
-            }
+            Links = new Dictionary<string, string>()
         };
 
-        var client = new HttpClient();
-        string responseBody;
+        HttpResponseMessage res;
 
         try
         {
-            responseBody = await client.GetStringAsync(url);
+            res = await _httpClient.GetAsync(url);
+            res.EnsureSuccessStatusCode();
         }
         catch (HttpRequestException e)
         {
             logger.Error(e, $"Failed to fetch URL: {url}");
             throw;
         }
+
+        result.Links.Add("DLsite", res.RequestMessage.RequestUri.ToString()); // for redirects
+        var responseBody = await res.Content.ReadAsStringAsync();
 
         var context = BrowsingContext.New(Configuration.Default);
         var document = await context.OpenAsync(req => req.Content(responseBody));
@@ -287,18 +282,5 @@ public class DLsiteScrapper(ILogger logger)
         images.AddRange(imageElements);
 
         return images;
-    }
-
-    public static bool IsValidUrl(string url)
-    {
-        var match = Regex.Match(url,
-            @"https://www\.dlsite\.com/(home|soft|maniax|pro)/work/=/product_id/(RJ|BJ|VJ)(\d{6}|\d{8})\.html");
-        return match.Success;
-    }
-    
-    public static bool IsValidId(string id)
-    {
-        var match = Regex.Match(id, @"(RJ|BJ|VJ)(\d{6}|\d{8})$");
-        return match.Success;
     }
 }

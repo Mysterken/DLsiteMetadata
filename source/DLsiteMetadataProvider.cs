@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Playnite.SDK;
 using Playnite.SDK.Models;
@@ -213,14 +214,12 @@ public class DLsiteMetadataProvider(
         )?.Url;
         var gameName = options.GameData?.Name;
 
-        var isValidUrl = dlsiteLink != null && DLsiteScrapper.IsValidUrl(dlsiteLink);
+        var isGameNameIdOrUrl = IsValidId(gameName) || IsValidUrl(gameName);
 
         var scrapper = new DLsiteScrapper(Logger);
 
-        if (!isValidUrl)
+        if (!IsValidUrl(dlsiteLink) && !isGameNameIdOrUrl)
         {
-            var defaultSearch = dlsiteLink != null && DLsiteScrapper.IsValidId(dlsiteLink) ? dlsiteLink : gameName;
-            
             var selectedGame = (DLsiteItemOption)playniteApi.Dialogs.ChooseItemWithSearch(
                 null,
                 query =>
@@ -279,22 +278,19 @@ public class DLsiteMetadataProvider(
                             game => new DLsiteItemOption(game.Title, game.Excerpt, game.Link)
                         ).ToList()
                     ];
-                }, defaultSearch, "Search DLsite");
+                }, gameName, "Search DLsite");
 
             if (selectedGame == null) return;
 
             dlsiteLink = selectedGame.Link;
         }
 
-        if (dlsiteLink == null)
-        {
-            Logger.Warn($"No DLsite link found for {gameName}");
-            return;
-        }
-
         try
         {
-            var gameTask = scrapper.ScrapGamePage(dlsiteLink, settings.GetSupportedLanguage());
+            var link = dlsiteLink ?? gameName;
+            var url = IsValidUrl(link) ? link : $"https://www.dlsite.com/home/work/=/product_id/{gameName}.html";
+
+            var gameTask = scrapper.ScrapGamePage(url, settings.GetSupportedLanguage());
             gameTask.Wait();
 
             _gameData = gameTask.Result;
@@ -350,5 +346,28 @@ public class DLsiteMetadataProvider(
         if (_gameData.ProductImages != null) fields.Add(MetadataField.BackgroundImage);
 
         return fields;
+    }
+
+    private const string WorkIdPattern = @"(?:RJ|RE|BJ|VJ)(?:\d{6}|\d{8})";
+
+    private static bool IsValidId(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return false;
+        }
+        var match = Regex.Match(id, WorkIdPattern);
+        return match.Success;
+    }
+
+    private static bool IsValidUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return false;
+        }
+        var match = Regex.Match(url,
+            $@"https://www\.dlsite\.com/(home|soft|maniax|pro)/work/=/product_id/{WorkIdPattern}\.html");
+        return match.Success;
     }
 }
