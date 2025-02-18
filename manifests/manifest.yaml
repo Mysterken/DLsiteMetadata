@@ -1,0 +1,11 @@
+﻿AddonId: 'DLsiteMetadata_db03c8d9-645a-4359-aafb-01cda945f301'
+Type: MetadataProvider
+InstallerManifestUrl: https://raw.githubusercontent.com/Mysterken/DLsiteMetadata/refs/heads/master/manifests/InstallerManifest.yaml
+ShortDescription: 'A plugin that fetches metadata from DLsite.'
+Name: 'DLsite Metadata'
+Author: 'Mysterken'
+Tags: ['Metadata', 'DLsite']
+SourceUrl: https://github.com/Mysterken/DLsiteMetadata
+Links:
+  DLsite: https://www.dlsite.com/
+  Github: https://github.com/Mysterken/DLsiteMetadata
