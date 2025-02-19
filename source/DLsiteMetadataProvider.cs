@@ -393,7 +393,7 @@ public class DLsiteMetadataProvider(
     {
         if (string.IsNullOrWhiteSpace(url)) return false;
         var match = Regex.Match(url,
-            $@"https://www\.dlsite\.com/(home|soft|maniax|pro)/work/=/product_id/{WorkIdPattern}\.html");
+            $@"https://www\.dlsite\.com/(home|soft|maniax|pro)/work/=/product_id/{WorkIdPattern}");
         return match.Success;
     }
 }
