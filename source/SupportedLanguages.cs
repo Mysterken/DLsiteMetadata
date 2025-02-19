@@ -222,6 +222,42 @@ public static class TranslationDictionary
         { SupportedLanguages.vi_VN, "Thể loại" }
     };
 
+    public static readonly Dictionary<SupportedLanguages, string> ProductFormat = new()
+    {
+        { SupportedLanguages.ja_JP, "作品形式" },
+        { SupportedLanguages.en_US, "Product format" },
+        { SupportedLanguages.zh_CN, "作品类型" },
+        { SupportedLanguages.zh_TW, "作品形式" },
+        { SupportedLanguages.ko_KR, "작품 형식" },
+        { SupportedLanguages.es_ES, "Formato del Producto" },
+        { SupportedLanguages.de_DE, "Titelformat" },
+        { SupportedLanguages.fr_FR, "Format du produit" },
+        { SupportedLanguages.id_ID, "Format Karya" },
+        { SupportedLanguages.it_IT, "Formato dell'opera" },
+        { SupportedLanguages.pt_BR, "Formato do produto" },
+        { SupportedLanguages.sv_SE, "Produktformat" },
+        { SupportedLanguages.th_TH, "รูปแบบผลงาน" },
+        { SupportedLanguages.vi_VN, "Định dạng tác phẩm" }
+    };
+
+    public static readonly Dictionary<SupportedLanguages, string> FileFormat = new()
+    {
+        { SupportedLanguages.ja_JP, "ファイル形式" },
+        { SupportedLanguages.en_US, "File format" },
+        { SupportedLanguages.zh_CN, "文件形式" },
+        { SupportedLanguages.zh_TW, "檔案形式" },
+        { SupportedLanguages.ko_KR, "파일 형식" },
+        { SupportedLanguages.es_ES, "Formato del Archivo" },
+        { SupportedLanguages.de_DE, "Dateiformat" },
+        { SupportedLanguages.fr_FR, "Format de fichier" },
+        { SupportedLanguages.id_ID, "Format file" },
+        { SupportedLanguages.it_IT, "Formato del file" },
+        { SupportedLanguages.pt_BR, "Formato do arquivo" },
+        { SupportedLanguages.sv_SE, "Filformat" },
+        { SupportedLanguages.th_TH, "รูปแบบไฟล์" },
+        { SupportedLanguages.vi_VN, "Định dạng tệp tin" }
+    };
+
     public static readonly Dictionary<SupportedLanguages, string> Filesize = new()
     {
         { SupportedLanguages.ja_JP, "ファイル容量" },

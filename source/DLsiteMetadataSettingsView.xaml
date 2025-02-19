@@ -29,6 +29,11 @@
         <CheckBox Content="Include Voice Actors as Developers" Margin="0, 0, 0, 5"
                   IsChecked="{Binding Settings.IncludeVoiceActors}" />
 
+        <CheckBox Content="Include Product Format as Features" Margin="0, 10, 0, 5"
+                  IsChecked="{Binding Settings.IncludeProductFormat}" />
+        <CheckBox Content="Include File Format as Features" Margin="0, 0, 0, 5"
+                  IsChecked="{Binding Settings.IncludeFileFormat}" />
+
         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
             <TextBlock Text="Max Search Results:" Margin="0, 0, 5, 0" />
             <ComboBox ItemsSource="{Binding Settings.MaxSearchResultsSteps}"

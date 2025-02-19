@@ -17,11 +17,13 @@ public class DLsiteScrapperResult
     [CanBeNull] public string Author { get; set; }
     [CanBeNull] public string Circle { get; set; }
     [CanBeNull] public string Description { get; set; }
+    [CanBeNull] public List<string> FileFormat { get; set; }
     [CanBeNull] public string Filesize { get; set; }
     [CanBeNull] public List<string> Genres { get; set; }
     [CanBeNull] public string Icon { get; set; }
     [CanBeNull] public List<string> Illustrators { get; set; }
     [CanBeNull] public Dictionary<string, string> Links { get; set; }
+    [CanBeNull] public List<string> ProductFormat { get; set; }
     [CanBeNull] public float? Rating { get; set; }
     [CanBeNull] public DateTime? ReleaseDate { get; set; }
     [CanBeNull] public string Series { get; set; }
