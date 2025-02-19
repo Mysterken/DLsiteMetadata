@@ -30,6 +30,7 @@ Supported [fields](https://api.playnite.link/docs/api/Playnite.SDK.Plugins.Metad
 - Cover Image
 - Description
 - Developers
+- Features
 - Genres
 - Icon
 - Links
@@ -59,6 +60,8 @@ You can configure the plugin by going to the plugin settings and setting the fol
 | Include Scenario Writers as Developers | No             | This will include Scenario Writers in the Developers field in Playnite |
 | Include Music Creators as Developers   | No             | This will include Music Creators in the Developers field in Playnite   |
 | Include Voice Actors as Developers     | No             | This will include Voice Actors in the Developers field in Playnite     |
+| Include Product Format as Features     | Yes            | This will include the Product Format in the Features field in Playnite |
+| Include File Format as Features        | No             | This will include the File Format in the Features field in Playnite    |
 | Max Search Results                     | 30             | Maximum amount of search results that should appear                    |
 
 ## Roadmap
