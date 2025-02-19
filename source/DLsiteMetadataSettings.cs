@@ -11,7 +11,7 @@ public class DLsiteMetadataSettings : ObservableObject
     private bool _includeScenarioWriters;
     private bool _includeVoiceActors;
     
-    private bool _includeProductFormat;
+    private bool _includeProductFormat = true;
     private bool _includeFileFormat;
 
     private int _maxSearchResults = 30;
