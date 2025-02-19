@@ -10,6 +10,9 @@ public class DLsiteMetadataSettings : ObservableObject
     private bool _includeMusicCreators;
     private bool _includeScenarioWriters;
     private bool _includeVoiceActors;
+    
+    private bool _includeProductFormat;
+    private bool _includeFileFormat;
 
     private int _maxSearchResults = 30;
     private string _pageLanguage = "English";
@@ -87,6 +90,18 @@ public class DLsiteMetadataSettings : ObservableObject
     {
         get => _includeVoiceActors;
         set => SetValue(ref _includeVoiceActors, value);
+    }
+    
+    public bool IncludeProductFormat
+    {
+        get => _includeProductFormat;
+        set => SetValue(ref _includeProductFormat, value);
+    }
+    
+    public bool IncludeFileFormat
+    {
+        get => _includeFileFormat;
+        set => SetValue(ref _includeFileFormat, value);
     }
 
     public int MaxSearchResults

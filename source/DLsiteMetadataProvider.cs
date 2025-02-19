@@ -15,6 +15,7 @@ public class DLsiteMetadataProvider(
     DLsiteMetadataSettings settings)
     : OnDemandMetadataProvider
 {
+    private const string WorkIdPattern = @"(?:RJ|RE|BJ|VJ)(?:\d{6}|\d{8})";
     private static readonly ILogger Logger = LogManager.GetLogger();
 
     private List<MetadataField> _availableFields;
@@ -28,6 +29,34 @@ public class DLsiteMetadataProvider(
         if (!AvailableFields.Contains(MetadataField.Description)) return base.GetDescription(args);
 
         return _gameData.Description;
+    }
+
+    public override IEnumerable<MetadataProperty> GetFeatures(GetMetadataFieldArgs args)
+    {
+        if (!AvailableFields.Contains(MetadataField.Features)) return base.GetFeatures(args);
+
+        var features = new List<MetadataProperty>();
+
+        if (_gameData.FileFormat != null && settings.IncludeFileFormat)
+            AddFeatures(_gameData.FileFormat);
+
+        if (_gameData.ProductFormat != null && settings.IncludeProductFormat)
+            AddFeatures(_gameData.ProductFormat);
+
+        return features;
+
+        void AddFeatures(IEnumerable<string> formats)
+        {
+            features.AddRange(formats.Select(format =>
+            {
+                var property = playniteApi.Database.Features
+                    .FirstOrDefault(feature => feature.Name?.Equals(format, StringComparison.OrdinalIgnoreCase) == true);
+
+                return property is null
+                    ? (MetadataProperty)new MetadataNameProperty(format)
+                    : new MetadataIdProperty(property.Id);
+            }));
+        }
     }
 
     public override string GetName(GetMetadataFieldArgs args)
@@ -331,6 +360,11 @@ public class DLsiteMetadataProvider(
 
         if (addDevelopers) fields.Add(MetadataField.Developers);
 
+        var addFeatures = (_gameData.FileFormat != null && settings.IncludeFileFormat) ||
+                          (_gameData.ProductFormat != null && settings.IncludeProductFormat);
+
+        if (addFeatures) fields.Add(MetadataField.Features);
+
         if (_gameData.Icon != null) fields.Add(MetadataField.Icon);
 
         if (_gameData.Links != null) fields.Add(MetadataField.Links);
@@ -348,24 +382,16 @@ public class DLsiteMetadataProvider(
         return fields;
     }
 
-    private const string WorkIdPattern = @"(?:RJ|RE|BJ|VJ)(?:\d{6}|\d{8})";
-
     private static bool IsValidId(string id)
     {
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(id)) return false;
         var match = Regex.Match(id, WorkIdPattern);
         return match.Success;
     }
 
     private static bool IsValidUrl(string url)
     {
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(url)) return false;
         var match = Regex.Match(url,
             $@"https://www\.dlsite\.com/(home|soft|maniax|pro)/work/=/product_id/{WorkIdPattern}\.html");
         return match.Success;

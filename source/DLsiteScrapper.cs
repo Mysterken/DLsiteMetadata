@@ -180,6 +180,24 @@ public class DLsiteScrapper(ILogger logger)
 
                     continue;
                 }
+                
+                if (header.TextContent.Contains(TranslationDictionary.ProductFormat[language]))
+                {
+                    result.ProductFormat = header.NextElementSibling?
+                        .QuerySelectorAll("span")
+                        .Select(x => x.Text().Trim())
+                        .ToList();
+                    continue;
+                }
+                
+                if (header.TextContent.Contains(TranslationDictionary.FileFormat[language]))
+                {
+                    result.FileFormat = header.NextElementSibling?
+                        .QuerySelectorAll("span")
+                        .Select(x => x.Text().Trim())
+                        .ToList();
+                    continue;
+                }
 
                 if (header.TextContent.Contains(TranslationDictionary.Miscellaneous[language]))
                 {
