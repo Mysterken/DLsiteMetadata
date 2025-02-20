@@ -33,6 +33,7 @@ public class DLsiteMetadataPlugin : MetadataPlugin
         MetadataField.Description,
         MetadataField.Genres,
         MetadataField.Developers,
+        MetadataField.Features,
         MetadataField.Links,
         MetadataField.CommunityScore,
         MetadataField.CommunityScore,
