@@ -28,19 +28,21 @@ public class DLsiteMetadataPlugin : MetadataPlugin
 
     public override List<MetadataField> SupportedFields { get; } =
     [
-        MetadataField.Name,
         MetadataField.AgeRating,
+        MetadataField.BackgroundImage,
+        MetadataField.CommunityScore,
+        MetadataField.CoverImage,
         MetadataField.Description,
-        MetadataField.Genres,
         MetadataField.Developers,
         MetadataField.Features,
+        MetadataField.Genres,
+        MetadataField.Icon,
         MetadataField.Links,
-        MetadataField.CommunityScore,
-        MetadataField.CommunityScore,
+        MetadataField.Name,
+        MetadataField.Publishers,
         MetadataField.ReleaseDate,
         MetadataField.Series,
-        MetadataField.CoverImage,
-        MetadataField.BackgroundImage
+        MetadataField.Tags
     ];
 
     public override string Name => "DLsite";
