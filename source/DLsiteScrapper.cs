@@ -76,20 +76,24 @@ public class DLsiteScrapper(ILogger logger)
                         case SupportedLanguages.ja_JP:
                         case SupportedLanguages.zh_CN:
                         case SupportedLanguages.zh_TW:
-                            DateTime.TryParseExact(releaseDateString, "yyyy'年'MM'月'dd'日'", CultureInfo.InvariantCulture,
-                                DateTimeStyles.None, out releaseDate);
+                            DateTime.TryParseExact(releaseDateString,
+                                ["yyyy'年'MM'月'dd'日'", "yyyy'年'MM'月'dd'日' H'時'"],
+                                CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
                             break;
                         case SupportedLanguages.en_US:
-                            DateTime.TryParseExact(releaseDateString, "MMM/dd/yyyy", CultureInfo.InvariantCulture,
-                                DateTimeStyles.None, out releaseDate);
+                            DateTime.TryParseExact(releaseDateString,
+                                ["MMM/dd/yyyy", "MMM/dd/yyyy H"],
+                                CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
                             break;
                         case SupportedLanguages.ko_KR:
-                            DateTime.TryParseExact(releaseDateString, "yyyy'년 'MM'월 'dd'일'",
+                            DateTime.TryParseExact(releaseDateString,
+                                ["yyyy'년 'MM'월 'dd'일'", "yyyy'년 'MM'월 'dd'일 H'시'"],
                                 CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
                             break;
                         case SupportedLanguages.es_ES:
-                            DateTime.TryParseExact(releaseDateString, "MM/dd/yyyy", CultureInfo.InvariantCulture,
-                                DateTimeStyles.None, out releaseDate);
+                            DateTime.TryParseExact(releaseDateString,
+                                ["MM/dd/yyyy", "MM/dd/yyyy H"],
+                                CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
                             break;
                         case SupportedLanguages.de_DE:
                         case SupportedLanguages.fr_FR:
@@ -99,8 +103,9 @@ public class DLsiteScrapper(ILogger logger)
                         case SupportedLanguages.sv_SE:
                         case SupportedLanguages.th_TH:
                         case SupportedLanguages.vi_VN:
-                            DateTime.TryParseExact(releaseDateString, "dd/MM/yyyy", CultureInfo.InvariantCulture,
-                                DateTimeStyles.None, out releaseDate);
+                            DateTime.TryParseExact(releaseDateString,
+                                ["dd/MM/yyyy", "dd/MM/yyyy H"],
+                                CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(language), language, "Unsupported language");
@@ -183,7 +188,7 @@ public class DLsiteScrapper(ILogger logger)
 
                     continue;
                 }
-                
+
                 if (header.TextContent.Contains(TranslationDictionary.ProductFormat[language]))
                 {
                     result.ProductFormat = header.NextElementSibling?
@@ -192,7 +197,7 @@ public class DLsiteScrapper(ILogger logger)
                         .ToList();
                     continue;
                 }
-                
+
                 if (header.TextContent.Contains(TranslationDictionary.FileFormat[language]))
                 {
                     result.FileFormat = header.NextElementSibling?
