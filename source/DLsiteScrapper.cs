@@ -125,7 +125,10 @@ public class DLsiteScrapper(ILogger logger)
 
                 if (header.TextContent.Contains(TranslationDictionary.Author[language]))
                 {
-                    result.Author = header.NextElementSibling?.Text().Trim();
+                    result.Author = header.NextElementSibling?
+                        .QuerySelectorAll("a")
+                        .Select(x => x.Text().Trim())
+                        .ToList();
                     continue;
                 }
 

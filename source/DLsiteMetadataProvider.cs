@@ -50,7 +50,8 @@ public class DLsiteMetadataProvider(
             features.AddRange(formats.Select(format =>
             {
                 var property = playniteApi.Database.Features
-                    .FirstOrDefault(feature => feature.Name?.Equals(format, StringComparison.OrdinalIgnoreCase) == true);
+                    .FirstOrDefault(feature =>
+                        feature.Name?.Equals(format, StringComparison.OrdinalIgnoreCase) == true);
 
                 return property is null
                     ? (MetadataProperty)new MetadataNameProperty(format)
@@ -125,32 +126,29 @@ public class DLsiteMetadataProvider(
 
         var staff = new List<string>();
 
-        if (_gameData.Author != null) staff.Add(_gameData.Author);
+        void AddStaff(IEnumerable<string> members)
+        {
+            if (members != null) staff.AddRange(members);
+        }
 
-        if (_gameData.Circle != null && _gameData.Author != _gameData.Circle) staff.Add(_gameData.Circle);
+        AddStaff(_gameData.Author);
 
-        if (settings.IncludeIllustrators && _gameData.Illustrators != null) staff.AddRange(_gameData.Illustrators);
+        if (_gameData.Circle != null && (_gameData.Author == null || !_gameData.Author.Contains(_gameData.Circle)))
+            staff.Add(_gameData.Circle);
+        if (settings.IncludeIllustrators) AddStaff(_gameData.Illustrators);
+        if (settings.IncludeScenarioWriters) AddStaff(_gameData.ScenarioWriters);
+        if (settings.IncludeMusicCreators) AddStaff(_gameData.MusicCreators);
+        if (settings.IncludeVoiceActors) AddStaff(_gameData.VoiceActors);
 
-        if (settings.IncludeScenarioWriters && _gameData.ScenarioWriters != null)
-            staff.AddRange(_gameData.ScenarioWriters);
+        return staff.Select(name =>
+        {
+            var company = playniteApi.Database.Companies
+                .FirstOrDefault(c => c.Name?.Equals(name, StringComparison.OrdinalIgnoreCase) == true);
 
-        if (settings.IncludeMusicCreators && _gameData.MusicCreators != null) staff.AddRange(_gameData.MusicCreators);
-
-        if (settings.IncludeVoiceActors && _gameData.VoiceActors != null) staff.AddRange(_gameData.VoiceActors);
-
-        var developers = staff
-            .Select(name => (name,
-                playniteApi.Database.Companies.Where(x => x.Name is not null).FirstOrDefault(company =>
-                    company.Name.Equals(name, StringComparison.OrdinalIgnoreCase))))
-            .Select(tuple =>
-            {
-                var (name, company) = tuple;
-                if (company is not null) return (MetadataProperty)new MetadataIdProperty(company.Id);
-                return new MetadataNameProperty(name);
-            })
-            .ToList();
-
-        return developers;
+            return company is null
+                ? (MetadataProperty)new MetadataNameProperty(name)
+                : new MetadataIdProperty(company.Id);
+        }).ToList();
     }
 
     public override IEnumerable<Link> GetLinks(GetMetadataFieldArgs args)
