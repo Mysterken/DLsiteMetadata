@@ -14,7 +14,7 @@ public class DLsiteScrapperResult
     }
 
     [CanBeNull] public AgeRating? Age { get; set; }
-    [CanBeNull] public string Author { get; set; }
+    [CanBeNull] public List<string> Author { get; set; }
     [CanBeNull] public string Circle { get; set; }
     [CanBeNull] public string Description { get; set; }
     [CanBeNull] public List<string> FileFormat { get; set; }
