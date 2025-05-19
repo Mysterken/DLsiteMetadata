@@ -2,7 +2,7 @@
 Packages:
   - Version: 1.14
     RequiredApiVersion: 6.11.0
-    ReleaseDate: 2025-05-18
+    ReleaseDate: 2025-05-19
     PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.14/DLsiteMetadata_1_14.pext
     Changelog:
       - Fix missing rating
