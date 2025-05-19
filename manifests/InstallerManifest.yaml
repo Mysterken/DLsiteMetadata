@@ -1,5 +1,12 @@
 ﻿AddonId: 'DLsiteMetadata_db03c8d9-645a-4359-aafb-01cda945f301'
 Packages:
+  - Version: 1.14
+    RequiredApiVersion: 6.11.0
+    ReleaseDate: 2025-05-19
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.14/DLsiteMetadata_1_14.pext
+    Changelog:
+      - Fix missing rating
+      - Improve game title and rating accuracy
   - Version: 1.13.3
     RequiredApiVersion: 6.11.0
     ReleaseDate: 2025-04-11

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Extensions;
+using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 
 namespace DLsiteMetadata;
@@ -47,11 +49,22 @@ public class DLsiteScrapper(ILogger logger)
         var context = BrowsingContext.New(Configuration.Default);
         var document = await context.OpenAsync(req => req.Content(responseBody));
 
-        var title = document.GetElementById("work_name")?.Text().Trim();
-        result.Title = title;
+        var productIdMatch = Regex.Match(url, @"product_id/([A-Z]{2}\d+)");
+        var productId = productIdMatch.Success ? productIdMatch.Groups[1].Value : null;
 
-        var rating = document.QuerySelector(".point.average_count")?.Text().Trim();
-        result.Rating = float.TryParse(rating, out var parsedRating) ? parsedRating : null;
+        if (!string.IsNullOrEmpty(productId))
+        {
+            // Rating is not available in the raw HTML — it's dynamically loaded via JavaScript.
+            // Use JSON API instead for reliable access.
+            var (jsonRating, jsonTitle) = await FetchJsonInfoAsync(productId, language);
+
+            if (jsonRating.HasValue)
+                result.Rating = (float)jsonRating.Value;
+            if (!string.IsNullOrWhiteSpace(jsonTitle))
+                result.Title = jsonTitle;
+        }
+
+        result.Title ??= document.GetElementById("work_name")?.Text().Trim();
 
         var circle = document.QuerySelector("[itemprop='brand']")?.Text().Trim();
         result.Circle = circle;
@@ -289,6 +302,48 @@ public class DLsiteScrapper(ILogger logger)
 
         return searchResults;
     }
+
+    /// Fetches work_name and rating from DLsite's JSON API (uses locale-sensitive data).
+    /// This is more reliable than scraping masked HTML nodes.
+    private async Task<(double? Rating, string WorkName)> FetchJsonInfoAsync(string productId,
+        SupportedLanguages language)
+    {
+        try
+        {
+            var handler = new HttpClientHandler { UseCookies = true, CookieContainer = new CookieContainer() };
+            handler.CookieContainer.Add(
+                new Uri("https://www.dlsite.com"),
+                new Cookie("locale", language.ToString())
+            );
+
+            using var client = new HttpClient(handler);
+            var url = $"https://www.dlsite.com/maniax/product/info/ajax?product_id={productId}&cdn_cache_min=1";
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.UserAgent.ParseAdd(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0");
+            request.Headers.Referrer =
+                new Uri($"https://www.dlsite.com/maniax/work/=/product_id/{productId}.html?locale={language}");
+            request.Headers.Add("X-Requested-With", "XMLHttpRequest");
+
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var productNode = JObject.Parse(json)[productId];
+
+            return (
+                productNode?["rate_average_2dp"]?.Value<float>(),
+                productNode?["work_name"]?.Value<string>()
+            );
+        }
+        catch (Exception ex)
+        {
+            logger.Warn(ex, $"Failed to fetch JSON data for {productId}");
+            return (null, null);
+        }
+    }
+
 
     private static List<string> ParseImages(IDocument document)
     {
