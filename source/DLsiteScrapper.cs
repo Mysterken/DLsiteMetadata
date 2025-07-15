@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Extensions;
+using DLsiteMetadata.Enums;
 using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using DLsiteMetadata.Exceptions;
@@ -22,7 +23,11 @@ public class DLsiteScrapper(ILogger logger)
     public const string SiteBaseUrl = "https://www.dlsite.com/";
     private readonly HttpClient _httpClient = new();
 
-    public async Task<DLsiteScrapperResult> ScrapGamePage(string url, SupportedLanguages language = DefaultLanguage)
+    public async Task<DLsiteScrapperResult> ScrapGamePage(
+        string url,
+        SupportedLanguages language = DefaultLanguage,
+        string categoryMappingTarget = "Genres"
+        )
     {
         if (!url.Contains("?locale=")) url += $"?locale={language.ToString()}";
 
@@ -219,10 +224,21 @@ public class DLsiteScrapper(ILogger logger)
 
                 if (header.TextContent.Contains(TranslationDictionary.ProductFormat[language]))
                 {
-                    result.ProductFormat = header.NextElementSibling?
-                        .QuerySelectorAll("span")
-                        .Select(x => x.Text().Trim())
-                        .ToList();
+                    var formatElements = header.NextElementSibling?.QuerySelectorAll("a") ??
+                                         Enumerable.Empty<IElement>();
+
+                    // Group formats by type (game vs. other) and extract text.
+                    var formatsByType = formatElements
+                        .Select(e => new
+                        {
+                            Text = e.QuerySelector("span")?.Text()?.Trim(),
+                            IsGameType = e.GetAttribute("href")?.Contains("work_type") == true
+                        })
+                        .Where(item => !string.IsNullOrEmpty(item.Text))
+                        .ToLookup(item => item.IsGameType);
+
+                    result.GameProductFormat = formatsByType[true].Select(item => item.Text).ToList();
+                    result.ProductFormat = formatsByType[false].Select(item => item.Text).ToList();
                     continue;
                 }
 
@@ -246,10 +262,16 @@ public class DLsiteScrapper(ILogger logger)
 
                 if (header.TextContent.Contains(TranslationDictionary.Genre[language]))
                 {
-                    result.Genres = header.NextElementSibling?
+                    var genres = header.NextElementSibling?
                         .QuerySelectorAll("a")
                         .Select(x => x.Text().Trim())
                         .ToList();
+
+                    if (categoryMappingTarget == "Genres")
+                        result.Genres = genres;
+                    else if (categoryMappingTarget == "Tags")
+                        result.Tags = genres;
+                    
                     continue;
                 }
 

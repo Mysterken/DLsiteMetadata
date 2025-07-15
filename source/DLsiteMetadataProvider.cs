@@ -38,6 +38,9 @@ public class DLsiteMetadataProvider(
 
         var features = new List<MetadataProperty>();
 
+        if (_gameData.GameProductFormat != null && !settings.AssignGameProductFormatToGenre)
+            AddFeatures(_gameData.GameProductFormat);
+
         if (_gameData.FileFormat != null && settings.IncludeFileFormat)
             AddFeatures(_gameData.FileFormat);
 
@@ -97,6 +100,12 @@ public class DLsiteMetadataProvider(
     {
         if (!AvailableFields.Contains(MetadataField.Genres)) return base.GetGenres(args);
 
+        if (_gameData.GameProductFormat != null && settings.AssignGameProductFormatToGenre)
+        {
+            _gameData.Genres ??= [];
+            _gameData.Genres?.AddRange(_gameData.GameProductFormat);
+        }
+
         if (_gameData.Genres == null) return new List<MetadataProperty>();
 
         var genres = _gameData.Genres
@@ -118,9 +127,9 @@ public class DLsiteMetadataProvider(
     {
         if (!AvailableFields.Contains(MetadataField.Tags)) return base.GetTags(args);
         
-        if (_gameData.Genres == null) return new List<MetadataProperty>();
+        if (_gameData.Tags == null) return new List<MetadataProperty>();
         
-        var tags = _gameData.Genres
+        var tags = _gameData.Tags
             .Select(tag => (tag,
                 playniteApi.Database.Tags.Where(x => x.Name is not null)
                     .FirstOrDefault(x => x.Name.Equals(tag, StringComparison.OrdinalIgnoreCase))))
@@ -339,7 +348,7 @@ public class DLsiteMetadataProvider(
             var link = dlsiteLink ?? gameName;
             var url = IsValidUrl(link) ? link : $"https://www.dlsite.com/home/work/=/product_id/{gameName}.html";
 
-            var gameTask = scrapper.ScrapGamePage(url, settings.GetSupportedLanguage());
+            var gameTask = scrapper.ScrapGamePage(url, settings.GetSupportedLanguage(), settings.CategoryMappingTarget);
             gameTask.Wait();
 
             _gameData = gameTask.Result;
@@ -376,10 +385,12 @@ public class DLsiteMetadataProvider(
 
         if (_gameData.Description != null) fields.Add(MetadataField.Description);
 
-        if (_gameData.Genres != null)
-            fields.Add(settings.CategoryMappingTarget == "Genres"
-                ? MetadataField.Genres
-                : MetadataField.Tags);
+        if (_gameData.Genres != null) fields.Add(MetadataField.Genres);
+
+        if (settings.AssignGameProductFormatToGenre && 
+            _gameData.GameProductFormat != null &&
+            !fields.Contains(MetadataField.Genres))
+            fields.Add(MetadataField.Genres);
 
         var addDevelopers = _gameData.Author != null ||
                             _gameData.Circle != null ||
@@ -404,6 +415,8 @@ public class DLsiteMetadataProvider(
         if (_gameData.ReleaseDate != null) fields.Add(MetadataField.ReleaseDate);
 
         if (_gameData.Series != null) fields.Add(MetadataField.Series);
+
+        if (_gameData.Tags != null) fields.Add(MetadataField.Tags);
 
         if (_gameData.MainImage != null) fields.Add(MetadataField.CoverImage);
 

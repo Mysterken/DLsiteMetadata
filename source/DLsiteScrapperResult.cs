@@ -19,6 +19,7 @@ public class DLsiteScrapperResult
     [CanBeNull] public string Description { get; set; }
     [CanBeNull] public List<string> FileFormat { get; set; }
     [CanBeNull] public string Filesize { get; set; }
+    [CanBeNull] public List<string> GameProductFormat { get; set; }
     [CanBeNull] public List<string> Genres { get; set; }
     [CanBeNull] public string Icon { get; set; }
     [CanBeNull] public List<string> Illustrators { get; set; }
@@ -28,6 +29,7 @@ public class DLsiteScrapperResult
     [CanBeNull] public DateTime? ReleaseDate { get; set; }
     [CanBeNull] public string Series { get; set; }
     [CanBeNull] public List<string> ScenarioWriters { get; set; }
+    [CanBeNull] public List<string> Tags { get; set; }
     [CanBeNull] public string MainImage { get; set; }
     [CanBeNull] public List<string> Miscellaneous { get; set; }
     [CanBeNull] public List<string> MusicCreators { get; set; }

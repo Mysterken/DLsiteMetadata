@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DLsiteMetadata.Enums;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 
@@ -13,6 +14,8 @@ public class DLsiteMetadataSettings : ObservableObject
     
     private bool _includeProductFormat = true;
     private bool _includeFileFormat;
+
+    private bool _assignGameProductFormatToGenre = true;
 
     private int _maxSearchResults = 30;
     private string _pageLanguage = "English";
@@ -116,6 +119,12 @@ public class DLsiteMetadataSettings : ObservableObject
     {
         get => _includeFileFormat;
         set => SetValue(ref _includeFileFormat, value);
+    }
+
+    public bool AssignGameProductFormatToGenre
+    {
+        get => _assignGameProductFormatToGenre;
+        set => SetValue(ref _assignGameProductFormatToGenre, value);
     }
 
     public int MaxSearchResults
