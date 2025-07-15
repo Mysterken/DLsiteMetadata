@@ -23,7 +23,8 @@ public class DLsiteScrapper(ILogger logger)
     public const string SiteBaseUrl = "https://www.dlsite.com/";
     private readonly HttpClient _httpClient = new();
 
-    public async Task<DLsiteScrapperResult> ScrapGamePage(
+    public async Task<DLsiteScrapperResult> ScrapGamePage
+    (
         string url,
         SupportedLanguages language = DefaultLanguage,
         string categoryMappingTarget = "Genres"
@@ -96,6 +97,9 @@ public class DLsiteScrapper(ILogger logger)
         if (table is not null)
         {
             var tableHeaders = table.QuerySelectorAll("th");
+            
+            // log every header for debugging
+            logger.Debug($"Table Headers: {string.Join(", ", tableHeaders.Select(h => h.TextContent))}");
 
             foreach (var header in tableHeaders)
             {
@@ -266,6 +270,16 @@ public class DLsiteScrapper(ILogger logger)
                         .QuerySelectorAll("a")
                         .Select(x => x.Text().Trim())
                         .ToList();
+                    
+                    // log categoryMappingTarget for debugging
+                    logger.Debug($"Category Mapping Target: {categoryMappingTarget}");
+                    if (genres is null || !genres.Any())
+                    {
+                        logger.Warn("No genres found in the document.");
+                        continue;
+                    }
+                    // log genres for debugging
+                    logger.Debug($"Genres found: {string.Join(", ", genres)}");
 
                     if (categoryMappingTarget == "Genres")
                         result.Genres = genres;
