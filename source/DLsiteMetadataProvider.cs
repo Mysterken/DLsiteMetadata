@@ -113,6 +113,27 @@ public class DLsiteMetadataProvider(
         return genres;
     }
 
+    public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)
+    {
+        if (!AvailableFields.Contains(MetadataField.Tags)) return base.GetTags(args);
+        
+        if (_gameData.Genres == null) return new List<MetadataProperty>();
+        
+        var tags = _gameData.Genres
+            .Select(tag => (tag,
+                playniteApi.Database.Tags.Where(x => x.Name is not null)
+                    .FirstOrDefault(x => x.Name.Equals(tag, StringComparison.OrdinalIgnoreCase))))
+            .Select(tuple =>
+            {
+                var (tag, property) = tuple;
+                if (property is not null) return (MetadataProperty)new MetadataIdProperty(property.Id);
+                return new MetadataNameProperty(tag);
+            })
+            .ToList();
+
+        return tags;
+    }
+
     public override MetadataFile GetIcon(GetMetadataFieldArgs args)
     {
         if (!AvailableFields.Contains(MetadataField.Icon)) return base.GetIcon(args);
@@ -347,7 +368,10 @@ public class DLsiteMetadataProvider(
 
         if (_gameData.Description != null) fields.Add(MetadataField.Description);
 
-        if (_gameData.Genres != null) fields.Add(MetadataField.Genres);
+        if (_gameData.Genres != null)
+            fields.Add(settings.CategoryMappingTarget == "Genres"
+                ? MetadataField.Genres
+                : MetadataField.Tags);
 
         var addDevelopers = _gameData.Author != null ||
                             _gameData.Circle != null ||

@@ -18,6 +18,7 @@ public class DLsiteMetadataSettings : ObservableObject
     private string _pageLanguage = "English";
 
     private string _searchCategory = "All categories";
+    private string _categoryMappingTarget = "Genres";
 
     [DontSerialize]
     public List<string> AvailableSearchCategory { get; } =
@@ -27,6 +28,13 @@ public class DLsiteMetadataSettings : ObservableObject
         "All ages PC Games",
         "Adult Doujin / Indie Games",
         "Adult H Games"
+    ];
+
+    [DontSerialize]
+    public List<string> AvailableCategoryMappingTarget { get; } =
+    [
+        "Genres",
+        "Tags"
     ];
 
     [DontSerialize]
@@ -60,6 +68,12 @@ public class DLsiteMetadataSettings : ObservableObject
     {
         get => _searchCategory;
         set => SetValue(ref _searchCategory, value);
+    }
+    
+    public string CategoryMappingTarget
+    {
+        get => _categoryMappingTarget;
+        set => SetValue(ref _categoryMappingTarget, value);
     }
 
     public string PageLanguage
@@ -209,6 +223,9 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
 
         if (!Settings.AvailableSearchCategory.Contains(Settings.SearchCategory))
             errors.Add("Selected category is not supported.");
+        
+        if (!Settings.AvailableCategoryMappingTarget.Contains(Settings.CategoryMappingTarget))
+            errors.Add("Selected category mapping target is not supported.");
 
         if (!Settings.AvailableLanguages.Contains(Settings.PageLanguage))
             errors.Add("Selected language is not supported.");

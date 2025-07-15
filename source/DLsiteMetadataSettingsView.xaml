@@ -14,10 +14,16 @@
                       SelectedValue="{Binding Settings.SearchCategory}" />
         </StackPanel>
 
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 10">
             <TextBlock Text="Page Language:" Margin="0, 0, 5, 0" />
             <ComboBox ItemsSource="{Binding Settings.AvailableLanguages}"
                       SelectedValue="{Binding Settings.PageLanguage}" />
+        </StackPanel>
+        
+        <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 5">
+            <TextBlock Text="Genres Mapping:" Margin="0, 0, 5, 0" />
+            <ComboBox ItemsSource="{Binding Settings.AvailableCategoryMappingTarget}"
+                      SelectedValue="{Binding Settings.CategoryMappingTarget}" />
         </StackPanel>
 
         <CheckBox Content="Include Illustrators as Developers" Margin="0, 5"
