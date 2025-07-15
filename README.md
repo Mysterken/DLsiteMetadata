@@ -14,6 +14,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Mysterken/DLsiteMetadata)](https://github.com/Mysterken/DLsiteMetadata/releases/latest)
 ![Language](https://img.shields.io/github/languages/top/Mysterken/DLsiteMetadata)
 [![GitHub](https://img.shields.io/github/license/Mysterken/DLsiteMetadata)](https://github.com/Mysterken/DLsiteMetadata/blob/master/LICENSE)  
+![GitHub downloads](https://img.shields.io/github/downloads/Mysterken/DLsiteMetadata/total)
 ![GitHub stars](https://img.shields.io/github/stars/Mysterken/DLsiteMetadata?style=social)
 </div>
 
@@ -38,6 +39,7 @@ Supported [fields](https://api.playnite.link/docs/api/Playnite.SDK.Plugins.Metad
 - Publishers
 - Release Date
 - Series
+- Tags
 
 ### Getting metadata directly from the game page
 
@@ -57,17 +59,19 @@ In both cases, the plugin will fetch the metadata from the game page and set it 
 
 You can configure the plugin by going to the plugin settings and setting the following values:
 
-| Name                                   | Default value  | Description                                                            |
-|----------------------------------------|----------------|------------------------------------------------------------------------|
-| Game category                          | All categories | What DLsite category should the plugin fetch from                      |
-| Page Language                          | English        | The page locale language                                               |
-| Include Illustrators as Developers     | No             | This will include Illustrators in the Developers field in Playnite     |
-| Include Scenario Writers as Developers | No             | This will include Scenario Writers in the Developers field in Playnite |
-| Include Music Creators as Developers   | No             | This will include Music Creators in the Developers field in Playnite   |
-| Include Voice Actors as Developers     | No             | This will include Voice Actors in the Developers field in Playnite     |
-| Include Product Format as Features     | Yes            | This will include the Product Format in the Features field in Playnite |
-| Include File Format as Features        | No             | This will include the File Format in the Features field in Playnite    |
-| Max Search Results                     | 30             | Maximum amount of search results that should appear                    |
+| Name                                   | Default value  | Description                                                               |
+|----------------------------------------|----------------|---------------------------------------------------------------------------|
+| Game category                          | All categories | What DLsite category should the plugin fetch from                         |
+| Page Language                          | English        | The page locale language                                                  |
+| Assign DLsite genres to                | Genres         | Which Playnite field should the plugin assign DLsite Genres to            |
+| Include Illustrators as Developers     | No             | This will include Illustrators in the Developers field in Playnite        |
+| Include Scenario Writers as Developers | No             | This will include Scenario Writers in the Developers field in Playnite    |
+| Include Music Creators as Developers   | No             | This will include Music Creators in the Developers field in Playnite      |
+| Include Voice Actors as Developers     | No             | This will include Voice Actors in the Developers field in Playnite        |
+| Include Product Format as Features     | Yes            | This will include the Product Format in the Features field in Playnite    |
+| Include File Format as Features        | No             | This will include the File Format in the Features field in Playnite       |
+| Max Search Results                     | 30             | Maximum amount of search results that should appear                       |
+| Assign Game Product Format to Genres   | Yes            | This will assign work_type Product Format to the Genres field in Playnite |
 
 ## Roadmap
 

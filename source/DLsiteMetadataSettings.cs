@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DLsiteMetadata.Enums;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 
@@ -14,10 +15,13 @@ public class DLsiteMetadataSettings : ObservableObject
     private bool _includeProductFormat = true;
     private bool _includeFileFormat;
 
+    private bool _assignGameProductFormatToGenre = true;
+
     private int _maxSearchResults = 30;
     private string _pageLanguage = "English";
 
     private string _searchCategory = "All categories";
+    private string _categoryMappingTarget = "Genres";
 
     [DontSerialize]
     public List<string> AvailableSearchCategory { get; } =
@@ -27,6 +31,13 @@ public class DLsiteMetadataSettings : ObservableObject
         "All ages PC Games",
         "Adult Doujin / Indie Games",
         "Adult H Games"
+    ];
+
+    [DontSerialize]
+    public List<string> AvailableCategoryMappingTarget { get; } =
+    [
+        "Genres",
+        "Tags"
     ];
 
     [DontSerialize]
@@ -60,6 +71,12 @@ public class DLsiteMetadataSettings : ObservableObject
     {
         get => _searchCategory;
         set => SetValue(ref _searchCategory, value);
+    }
+    
+    public string CategoryMappingTarget
+    {
+        get => _categoryMappingTarget;
+        set => SetValue(ref _categoryMappingTarget, value);
     }
 
     public string PageLanguage
@@ -102,6 +119,12 @@ public class DLsiteMetadataSettings : ObservableObject
     {
         get => _includeFileFormat;
         set => SetValue(ref _includeFileFormat, value);
+    }
+
+    public bool AssignGameProductFormatToGenre
+    {
+        get => _assignGameProductFormatToGenre;
+        set => SetValue(ref _assignGameProductFormatToGenre, value);
     }
 
     public int MaxSearchResults
@@ -209,6 +232,9 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
 
         if (!Settings.AvailableSearchCategory.Contains(Settings.SearchCategory))
             errors.Add("Selected category is not supported.");
+        
+        if (!Settings.AvailableCategoryMappingTarget.Contains(Settings.CategoryMappingTarget))
+            errors.Add("Selected category mapping target is not supported.");
 
         if (!Settings.AvailableLanguages.Contains(Settings.PageLanguage))
             errors.Add("Selected language is not supported.");

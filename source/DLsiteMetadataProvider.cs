@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DLsiteMetadata.Exceptions;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
@@ -36,6 +37,9 @@ public class DLsiteMetadataProvider(
         if (!AvailableFields.Contains(MetadataField.Features)) return base.GetFeatures(args);
 
         var features = new List<MetadataProperty>();
+
+        if (_gameData.GameProductFormat != null && !settings.AssignGameProductFormatToGenre)
+            AddFeatures(_gameData.GameProductFormat);
 
         if (_gameData.FileFormat != null && settings.IncludeFileFormat)
             AddFeatures(_gameData.FileFormat);
@@ -96,6 +100,12 @@ public class DLsiteMetadataProvider(
     {
         if (!AvailableFields.Contains(MetadataField.Genres)) return base.GetGenres(args);
 
+        if (_gameData.GameProductFormat != null && settings.AssignGameProductFormatToGenre)
+        {
+            _gameData.Genres ??= [];
+            _gameData.Genres?.AddRange(_gameData.GameProductFormat);
+        }
+
         if (_gameData.Genres == null) return new List<MetadataProperty>();
 
         var genres = _gameData.Genres
@@ -111,6 +121,27 @@ public class DLsiteMetadataProvider(
             .ToList();
 
         return genres;
+    }
+
+    public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)
+    {
+        if (!AvailableFields.Contains(MetadataField.Tags)) return base.GetTags(args);
+        
+        if (_gameData.Tags == null) return new List<MetadataProperty>();
+        
+        var tags = _gameData.Tags
+            .Select(tag => (tag,
+                playniteApi.Database.Tags.Where(x => x.Name is not null)
+                    .FirstOrDefault(x => x.Name.Equals(tag, StringComparison.OrdinalIgnoreCase))))
+            .Select(tuple =>
+            {
+                var (tag, property) = tuple;
+                if (property is not null) return (MetadataProperty)new MetadataIdProperty(property.Id);
+                return new MetadataNameProperty(tag);
+            })
+            .ToList();
+
+        return tags;
     }
 
     public override MetadataFile GetIcon(GetMetadataFieldArgs args)
@@ -317,19 +348,26 @@ public class DLsiteMetadataProvider(
             var link = dlsiteLink ?? gameName;
             var url = IsValidUrl(link) ? link : $"https://www.dlsite.com/home/work/=/product_id/{gameName}.html";
 
-            var gameTask = scrapper.ScrapGamePage(url, settings.GetSupportedLanguage());
+            var gameTask = scrapper.ScrapGamePage(url, settings.GetSupportedLanguage(), settings.CategoryMappingTarget);
             gameTask.Wait();
 
             _gameData = gameTask.Result;
 
             if (_gameData == null) Logger.Warn($"Failed to get metadata for {gameName ?? "the selected game"}");
         }
-        catch (Exception)
+        catch (AggregateException ae)
         {
-            playniteApi.Dialogs.ShowErrorMessage(
-                $"Failed to fetch metadata from DLsite for {gameName ?? "the selected game"}",
-                "DLsiteMetadata Error"
-            );
+            // When using Task.Wait(), exceptions are wrapped in AggregateException
+            if (ae.InnerExceptions.Count == 1 && ae.InnerException is ProductUnavailableException ex)
+                playniteApi.Dialogs.ShowErrorMessage(
+                    $"Product unavailable: {ex.Message}",
+                    "DLsiteMetadata Error"
+                );
+            else
+                playniteApi.Dialogs.ShowErrorMessage(
+                    $"Failed to fetch metadata from DLsite for {gameName ?? "the selected game"}",
+                    "DLsiteMetadata Error"
+                );
         }
     }
 
@@ -348,6 +386,11 @@ public class DLsiteMetadataProvider(
         if (_gameData.Description != null) fields.Add(MetadataField.Description);
 
         if (_gameData.Genres != null) fields.Add(MetadataField.Genres);
+
+        if (settings.AssignGameProductFormatToGenre && 
+            _gameData.GameProductFormat != null &&
+            !fields.Contains(MetadataField.Genres))
+            fields.Add(MetadataField.Genres);
 
         var addDevelopers = _gameData.Author != null ||
                             _gameData.Circle != null ||
@@ -372,6 +415,8 @@ public class DLsiteMetadataProvider(
         if (_gameData.ReleaseDate != null) fields.Add(MetadataField.ReleaseDate);
 
         if (_gameData.Series != null) fields.Add(MetadataField.Series);
+
+        if (_gameData.Tags != null) fields.Add(MetadataField.Tags);
 
         if (_gameData.MainImage != null) fields.Add(MetadataField.CoverImage);
 
