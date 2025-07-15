@@ -11,6 +11,7 @@ using AngleSharp.Dom;
 using AngleSharp.Extensions;
 using Newtonsoft.Json.Linq;
 using Playnite.SDK;
+using DLsiteMetadata.Exceptions;
 
 namespace DLsiteMetadata;
 
@@ -51,6 +52,20 @@ public class DLsiteScrapper(ILogger logger)
 
         var productIdMatch = Regex.Match(url, @"product_id/([A-Z]{2}\d+)");
         var productId = productIdMatch.Success ? productIdMatch.Groups[1].Value : null;
+
+        var errorBox = document.QuerySelector(".error_box_work");
+        if (errorBox != null)
+        {
+            var errorMessage = errorBox.QuerySelector(".error_large_text")?.TextContent ?? "Unknown error";
+            var detailMessage = errorBox.QuerySelector(".title_text")?.TextContent;
+
+            var fullErrorMessage = string.IsNullOrEmpty(detailMessage)
+                ? errorMessage
+                : $"{errorMessage} : {detailMessage}";
+
+            logger.Warn($"Product unavailable: {fullErrorMessage}");
+            throw new ProductUnavailableException(fullErrorMessage.Trim());
+        }
 
         if (!string.IsNullOrEmpty(productId))
         {

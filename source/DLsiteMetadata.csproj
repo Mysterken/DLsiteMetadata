@@ -91,6 +91,7 @@
     </Compile>
     <Compile Include="DLsiteScrapper.cs"/>
     <Compile Include="DLsiteScrapperResult.cs"/>
+    <Compile Include="Exceptions\ProductUnavailableException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs"/>
     <Compile Include="SupportedLanguages.cs"/>
   </ItemGroup>

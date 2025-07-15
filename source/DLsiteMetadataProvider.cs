@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DLsiteMetadata.Exceptions;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
@@ -345,12 +346,19 @@ public class DLsiteMetadataProvider(
 
             if (_gameData == null) Logger.Warn($"Failed to get metadata for {gameName ?? "the selected game"}");
         }
-        catch (Exception)
+        catch (AggregateException ae)
         {
-            playniteApi.Dialogs.ShowErrorMessage(
-                $"Failed to fetch metadata from DLsite for {gameName ?? "the selected game"}",
-                "DLsiteMetadata Error"
-            );
+            // When using Task.Wait(), exceptions are wrapped in AggregateException
+            if (ae.InnerExceptions.Count == 1 && ae.InnerException is ProductUnavailableException ex)
+                playniteApi.Dialogs.ShowErrorMessage(
+                    $"Product unavailable: {ex.Message}",
+                    "DLsiteMetadata Error"
+                );
+            else
+                playniteApi.Dialogs.ShowErrorMessage(
+                    $"Failed to fetch metadata from DLsite for {gameName ?? "the selected game"}",
+                    "DLsiteMetadata Error"
+                );
         }
     }
 
