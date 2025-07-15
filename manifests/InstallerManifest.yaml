@@ -1,5 +1,13 @@
 ﻿AddonId: 'DLsiteMetadata_db03c8d9-645a-4359-aafb-01cda945f301'
 Packages:
+  - Version: 1.15
+    RequiredApiVersion: 6.11.0
+    ReleaseDate: 2025-07-15
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.15/DLsiteMetadata_1_15.pext
+    Changelog:
+      - Add option to select which Playnite fields to assign DLsite Genres to
+      - Add option to assign game product format to Playnite Genres
+      - Improve error message if the product is not available
   - Version: 1.14
     RequiredApiVersion: 6.11.0
     ReleaseDate: 2025-05-19
