@@ -21,7 +21,6 @@ public class DLsiteScrapper(ILogger logger)
     private const SupportedLanguages DefaultLanguage = SupportedLanguages.en_US;
 
     public const string SiteBaseUrl = "https://www.dlsite.com/";
-    private readonly HttpClient _httpClient = new();
 
     public async Task<DLsiteScrapperResult> ScrapGamePage
     (
@@ -30,8 +29,6 @@ public class DLsiteScrapper(ILogger logger)
         string categoryMappingTarget = "Genres"
         )
     {
-        if (!url.Contains("?locale=")) url += $"?locale={language.ToString()}";
-
         var result = new DLsiteScrapperResult
         {
             Links = new Dictionary<string, string>()
@@ -41,7 +38,14 @@ public class DLsiteScrapper(ILogger logger)
 
         try
         {
-            res = await _httpClient.GetAsync(url);
+            var handler = new HttpClientHandler { UseCookies = true, CookieContainer = new CookieContainer() };
+            handler.CookieContainer.Add(
+                new Uri(SiteBaseUrl),
+                new Cookie("locale", language.ToString())
+            );
+
+            using var client = new HttpClient(handler);
+            res = await client.GetAsync(url);
             res.EnsureSuccessStatusCode();
         }
         catch (HttpRequestException e)
@@ -97,9 +101,6 @@ public class DLsiteScrapper(ILogger logger)
         if (table is not null)
         {
             var tableHeaders = table.QuerySelectorAll("th");
-            
-            // log every header for debugging
-            logger.Debug($"Table Headers: {string.Join(", ", tableHeaders.Select(h => h.TextContent))}");
 
             foreach (var header in tableHeaders)
             {
@@ -270,16 +271,6 @@ public class DLsiteScrapper(ILogger logger)
                         .QuerySelectorAll("a")
                         .Select(x => x.Text().Trim())
                         .ToList();
-                    
-                    // log categoryMappingTarget for debugging
-                    logger.Debug($"Category Mapping Target: {categoryMappingTarget}");
-                    if (genres is null || !genres.Any())
-                    {
-                        logger.Warn("No genres found in the document.");
-                        continue;
-                    }
-                    // log genres for debugging
-                    logger.Debug($"Genres found: {string.Join(", ", genres)}");
 
                     if (categoryMappingTarget == "Genres")
                         result.Genres = genres;

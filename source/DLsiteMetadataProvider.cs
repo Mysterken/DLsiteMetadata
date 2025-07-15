@@ -276,7 +276,7 @@ public class DLsiteMetadataProvider(
 
         var scrapper = new DLsiteScrapper(Logger);
 
-        if (!IsValidUrl(dlsiteLink))
+        if (!IsValidUrl(dlsiteLink) && !isGameNameIdOrUrl)
         {
             var selectedGame = (DLsiteItemOption)playniteApi.Dialogs.ChooseItemWithSearch(
                 null,
