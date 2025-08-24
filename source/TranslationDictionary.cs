@@ -185,6 +185,24 @@ public static class TranslationDictionary
         { SupportedLanguages.vi_VN, "Loại khác" }
     };
 
+    public static readonly Dictionary<SupportedLanguages, string> GameSupportedLanguages = new()
+    {
+        { SupportedLanguages.ja_JP, "対応言語" },
+        { SupportedLanguages.en_US, "Supported languages" },
+        { SupportedLanguages.zh_CN, "支持的语言" },
+        { SupportedLanguages.zh_TW, "對應語言" },
+        { SupportedLanguages.ko_KR, "대응 언어" },
+        { SupportedLanguages.es_ES, "Idiomas Admitidos" },
+        { SupportedLanguages.de_DE, "Unterstützte Sprachen" },
+        { SupportedLanguages.fr_FR, "Langues prises en charge" },
+        { SupportedLanguages.id_ID, "Bahasa yang didukung" },
+        { SupportedLanguages.it_IT, "Lingue supportate" },
+        { SupportedLanguages.pt_BR, "Línguas disponíveis" },
+        { SupportedLanguages.sv_SE, "Språk som stöds" },
+        { SupportedLanguages.th_TH, "ภาษาที่รองรับ" },
+        { SupportedLanguages.vi_VN, "Ngôn ngữ được hỗ trợ" }
+    };
+
     public static readonly Dictionary<SupportedLanguages, string> Genre = new()
     {
         { SupportedLanguages.ja_JP, "ジャンル" },

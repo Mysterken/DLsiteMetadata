@@ -22,6 +22,7 @@ public class DLsiteMetadataSettings : ObservableObject
 
     private string _searchCategory = "All categories";
     private string _categoryMappingTarget = "Genres";
+    private string _supportedLanguagesMappingTarget = "None";
 
     [DontSerialize]
     public List<string> AvailableSearchCategory { get; } =
@@ -38,6 +39,14 @@ public class DLsiteMetadataSettings : ObservableObject
     [
         "Genres",
         "Tags"
+    ];
+
+    [DontSerialize]
+    public List<string> AvailableSupportedLanguagesMappingTarget { get; } =
+    [
+        "Genres",
+        "Tags",
+        "None"
     ];
 
     [DontSerialize]
@@ -77,6 +86,12 @@ public class DLsiteMetadataSettings : ObservableObject
     {
         get => _categoryMappingTarget;
         set => SetValue(ref _categoryMappingTarget, value);
+    }
+
+    public string SupportedLanguagesMappingTarget
+    {
+        get => _supportedLanguagesMappingTarget;
+        set => SetValue(ref _supportedLanguagesMappingTarget, value);
     }
 
     public string PageLanguage
@@ -235,6 +250,9 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
         
         if (!Settings.AvailableCategoryMappingTarget.Contains(Settings.CategoryMappingTarget))
             errors.Add("Selected category mapping target is not supported.");
+        
+        if (!Settings.AvailableSupportedLanguagesMappingTarget.Contains(Settings.SupportedLanguagesMappingTarget))
+            errors.Add("Selected supported languages mapping target is not supported.");
 
         if (!Settings.AvailableLanguages.Contains(Settings.PageLanguage))
             errors.Add("Selected language is not supported.");

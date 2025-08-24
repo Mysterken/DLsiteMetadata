@@ -1,5 +1,11 @@
 ﻿AddonId: 'DLsiteMetadata_db03c8d9-645a-4359-aafb-01cda945f301'
 Packages:
+  - Version: 1.15.2
+    RequiredApiVersion: 6.11.0
+    ReleaseDate: 2025-08-24
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.15.2/DLsiteMetadata_1_15_2.pext
+    Changelog:
+      - Add option to assign Supported Languages to metadata field
   - Version: 1.15.1
     RequiredApiVersion: 6.11.0
     ReleaseDate: 2025-07-15

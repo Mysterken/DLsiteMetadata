@@ -32,6 +32,7 @@ public class DLsiteScrapperResult
     [CanBeNull] public List<string> Tags { get; set; }
     [CanBeNull] public string MainImage { get; set; }
     [CanBeNull] public List<string> Miscellaneous { get; set; }
+    [CanBeNull] public List<string> SupportedLanguages { get; set; }
     [CanBeNull] public List<string> MusicCreators { get; set; }
     [CanBeNull] public List<string> ProductImages { get; set; }
     [CanBeNull] public string Title { get; set; }
