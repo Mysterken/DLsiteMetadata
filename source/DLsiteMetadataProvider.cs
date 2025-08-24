@@ -106,6 +106,12 @@ public class DLsiteMetadataProvider(
             _gameData.Genres?.AddRange(_gameData.GameProductFormat);
         }
 
+        if (_gameData.SupportedLanguages != null && settings.SupportedLanguagesMappingTarget == "Genres")
+        {
+            _gameData.Genres ??= [];
+            _gameData.Genres?.AddRange(_gameData.SupportedLanguages);
+        }
+
         if (_gameData.Genres == null) return new List<MetadataProperty>();
 
         var genres = _gameData.Genres
@@ -126,7 +132,13 @@ public class DLsiteMetadataProvider(
     public override IEnumerable<MetadataProperty> GetTags(GetMetadataFieldArgs args)
     {
         if (!AvailableFields.Contains(MetadataField.Tags)) return base.GetTags(args);
-        
+
+        if (_gameData.SupportedLanguages != null && settings.SupportedLanguagesMappingTarget == "Tags")
+        {
+            _gameData.Tags ??= [];
+            _gameData.Tags?.AddRange(_gameData.SupportedLanguages);
+        }
+
         if (_gameData.Tags == null) return new List<MetadataProperty>();
         
         var tags = _gameData.Tags
@@ -405,6 +417,16 @@ public class DLsiteMetadataProvider(
                           (_gameData.ProductFormat != null && settings.IncludeProductFormat);
 
         if (addFeatures) fields.Add(MetadataField.Features);
+
+        if (settings.SupportedLanguagesMappingTarget != "None" && _gameData.SupportedLanguages != null)
+        {
+            var targetField = settings.SupportedLanguagesMappingTarget == "Genres" 
+                ? MetadataField.Genres 
+                : MetadataField.Tags;
+    
+            if (!fields.Contains(targetField)) 
+                fields.Add(targetField);
+        }
 
         if (_gameData.Icon != null) fields.Add(MetadataField.Icon);
 

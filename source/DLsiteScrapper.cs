@@ -265,6 +265,15 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
+                if (header.TextContent.Contains(TranslationDictionary.GameSupportedLanguages[language]))
+                {
+                    result.SupportedLanguages = header.NextElementSibling?
+                        .QuerySelectorAll("a")
+                        .Select(x => x.Text().Trim())
+                        .ToList();
+                    continue;
+                }
+
                 if (header.TextContent.Contains(TranslationDictionary.Genre[language]))
                 {
                     var genres = header.NextElementSibling?

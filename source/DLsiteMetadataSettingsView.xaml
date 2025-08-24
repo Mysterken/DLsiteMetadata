@@ -20,10 +20,16 @@
                       SelectedValue="{Binding Settings.PageLanguage}" />
         </StackPanel>
         
-        <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 5">
+        <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 10">
             <TextBlock Text="Assign DLsite genres to:" Margin="0, 0, 5, 0" />
             <ComboBox ItemsSource="{Binding Settings.AvailableCategoryMappingTarget}"
                       SelectedValue="{Binding Settings.CategoryMappingTarget}" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 5">
+            <TextBlock Text="Assign Supported languages to:" Margin="0, 0, 5, 0" />
+            <ComboBox ItemsSource="{Binding Settings.AvailableSupportedLanguagesMappingTarget}"
+                      SelectedValue="{Binding Settings.SupportedLanguagesMappingTarget}" />
         </StackPanel>
 
         <CheckBox Content="Include Illustrators as Developers" Margin="0, 5"
