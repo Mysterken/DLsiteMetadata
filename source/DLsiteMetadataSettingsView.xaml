@@ -32,6 +32,9 @@
                       SelectedValue="{Binding Settings.SupportedLanguagesMappingTarget}" />
         </StackPanel>
 
+        <CheckBox Content="Include AI-generated works in search" Margin="0, 0, 0, 5"
+                  IsChecked="{Binding Settings.IncludeAiGeneratedWorks}" />
+
         <CheckBox Content="Include Illustrators as Developers" Margin="0, 5"
                   IsChecked="{Binding Settings.IncludeIllustrators}" />
         <CheckBox Content="Include Scenario Writers as Developers" Margin="0, 0, 0, 5"

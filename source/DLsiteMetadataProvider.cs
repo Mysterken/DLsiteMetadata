@@ -304,7 +304,8 @@ public class DLsiteMetadataProvider(
                                 DLsiteMetadataSettings.GetSearchCategoryPath(category),
                                 query,
                                 settings.MaxSearchResults,
-                                settings.GetSupportedLanguage()))
+                                settings.GetSupportedLanguage(),
+                                settings.IncludeAiGeneratedWorks))
                             .ToList();
 
                         var searchResults = Task.WhenAll(searchTasks);
@@ -329,7 +330,8 @@ public class DLsiteMetadataProvider(
                             DLsiteMetadataSettings.GetSearchCategoryPath(settings.SearchCategory),
                             query,
                             settings.MaxSearchResults,
-                            settings.GetSupportedLanguage());
+                            settings.GetSupportedLanguage(),
+                            settings.IncludeAiGeneratedWorks);
 
                         searchTask.Wait();
 
@@ -458,7 +460,7 @@ public class DLsiteMetadataProvider(
     {
         if (string.IsNullOrWhiteSpace(url)) return false;
         var match = Regex.Match(url,
-            $@"https://www\.dlsite\.com/(home|soft|maniax|pro)/work/=/product_id/{WorkIdPattern}");
+            $@"https://www\.dlsite\.com/(home|soft|maniax|pro|aix)/work/=/product_id/{WorkIdPattern}");
         return match.Success;
     }
 }

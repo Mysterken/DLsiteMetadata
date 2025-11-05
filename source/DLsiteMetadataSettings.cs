@@ -7,6 +7,8 @@ namespace DLsiteMetadata;
 
 public class DLsiteMetadataSettings : ObservableObject
 {
+    private bool _includeAiGeneratedWorks;
+
     private bool _includeIllustrators;
     private bool _includeMusicCreators;
     private bool _includeScenarioWriters;
@@ -98,6 +100,12 @@ public class DLsiteMetadataSettings : ObservableObject
     {
         get => _pageLanguage;
         set => SetValue(ref _pageLanguage, value);
+    }
+
+    public bool IncludeAiGeneratedWorks
+    {
+        get => _includeAiGeneratedWorks;
+        set => SetValue(ref _includeAiGeneratedWorks, value);
     }
 
     public bool IncludeIllustrators
