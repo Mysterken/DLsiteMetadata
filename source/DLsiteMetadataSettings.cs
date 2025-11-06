@@ -7,21 +7,22 @@ namespace DLsiteMetadata;
 
 public class DLsiteMetadataSettings : ObservableObject
 {
-    private bool _includeIllustrators;
-    private bool _includeMusicCreators;
-    private bool _includeScenarioWriters;
-    private bool _includeVoiceActors;
-    
-    private bool _includeProductFormat = true;
+    private bool _assignGameProductFormatToGenre = true;
+    private string _categoryMappingTarget = "Genres";
+    private bool _includeAiGeneratedWorks;
     private bool _includeFileFormat;
 
-    private bool _assignGameProductFormatToGenre = true;
+    private bool _includeIllustrators;
+    private bool _includeMusicCreators;
+
+    private bool _includeProductFormat = true;
+    private bool _includeScenarioWriters;
+    private bool _includeVoiceActors;
 
     private int _maxSearchResults = 30;
     private string _pageLanguage = "English";
 
     private string _searchCategory = "All categories";
-    private string _categoryMappingTarget = "Genres";
     private string _supportedLanguagesMappingTarget = "None";
 
     [DontSerialize]
@@ -81,7 +82,7 @@ public class DLsiteMetadataSettings : ObservableObject
         get => _searchCategory;
         set => SetValue(ref _searchCategory, value);
     }
-    
+
     public string CategoryMappingTarget
     {
         get => _categoryMappingTarget;
@@ -98,6 +99,12 @@ public class DLsiteMetadataSettings : ObservableObject
     {
         get => _pageLanguage;
         set => SetValue(ref _pageLanguage, value);
+    }
+
+    public bool IncludeAiGeneratedWorks
+    {
+        get => _includeAiGeneratedWorks;
+        set => SetValue(ref _includeAiGeneratedWorks, value);
     }
 
     public bool IncludeIllustrators
@@ -123,13 +130,13 @@ public class DLsiteMetadataSettings : ObservableObject
         get => _includeVoiceActors;
         set => SetValue(ref _includeVoiceActors, value);
     }
-    
+
     public bool IncludeProductFormat
     {
         get => _includeProductFormat;
         set => SetValue(ref _includeProductFormat, value);
     }
-    
+
     public bool IncludeFileFormat
     {
         get => _includeFileFormat;
@@ -247,10 +254,10 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
 
         if (!Settings.AvailableSearchCategory.Contains(Settings.SearchCategory))
             errors.Add("Selected category is not supported.");
-        
+
         if (!Settings.AvailableCategoryMappingTarget.Contains(Settings.CategoryMappingTarget))
             errors.Add("Selected category mapping target is not supported.");
-        
+
         if (!Settings.AvailableSupportedLanguagesMappingTarget.Contains(Settings.SupportedLanguagesMappingTarget))
             errors.Add("Selected supported languages mapping target is not supported.");
 

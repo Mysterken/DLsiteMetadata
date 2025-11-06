@@ -7,7 +7,7 @@
              d:DesignHeight="400" d:DesignWidth="600">
 
     <StackPanel Margin="10">
-        
+
         <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 10">
             <TextBlock Text="Game category:" Margin="0, 0, 5, 0" />
             <ComboBox ItemsSource="{Binding Settings.AvailableSearchCategory}"
@@ -19,7 +19,7 @@
             <ComboBox ItemsSource="{Binding Settings.AvailableLanguages}"
                       SelectedValue="{Binding Settings.PageLanguage}" />
         </StackPanel>
-        
+
         <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 10">
             <TextBlock Text="Assign DLsite genres to:" Margin="0, 0, 5, 0" />
             <ComboBox ItemsSource="{Binding Settings.AvailableCategoryMappingTarget}"
@@ -31,6 +31,9 @@
             <ComboBox ItemsSource="{Binding Settings.AvailableSupportedLanguagesMappingTarget}"
                       SelectedValue="{Binding Settings.SupportedLanguagesMappingTarget}" />
         </StackPanel>
+
+        <CheckBox Content="Include AI-generated works in search" Margin="0, 0, 0, 5"
+                  IsChecked="{Binding Settings.IncludeAiGeneratedWorks}" />
 
         <CheckBox Content="Include Illustrators as Developers" Margin="0, 5"
                   IsChecked="{Binding Settings.IncludeIllustrators}" />

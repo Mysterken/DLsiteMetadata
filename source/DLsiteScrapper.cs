@@ -10,9 +10,9 @@ using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Extensions;
 using DLsiteMetadata.Enums;
+using DLsiteMetadata.Exceptions;
 using Newtonsoft.Json.Linq;
 using Playnite.SDK;
-using DLsiteMetadata.Exceptions;
 
 namespace DLsiteMetadata;
 
@@ -22,12 +22,11 @@ public class DLsiteScrapper(ILogger logger)
 
     public const string SiteBaseUrl = "https://www.dlsite.com/";
 
-    public async Task<DLsiteScrapperResult> ScrapGamePage
-    (
+    public async Task<DLsiteScrapperResult> ScrapGamePage(
         string url,
         SupportedLanguages language = DefaultLanguage,
         string categoryMappingTarget = "Genres"
-        )
+    )
     {
         var result = new DLsiteScrapperResult
         {
@@ -39,10 +38,10 @@ public class DLsiteScrapper(ILogger logger)
         try
         {
             var handler = new HttpClientHandler { UseCookies = true, CookieContainer = new CookieContainer() };
-            handler.CookieContainer.Add(
-                new Uri(SiteBaseUrl),
-                new Cookie("locale", language.ToString())
-            );
+            var baseUri = new Uri(SiteBaseUrl);
+
+            handler.CookieContainer.Add(baseUri, new Cookie("locale", language.ToString(), "/", ".dlsite.com"));
+            handler.CookieContainer.Add(baseUri, new Cookie("loginchecked", "1", "/", ".dlsite.com"));
 
             using var client = new HttpClient(handler);
             res = await client.GetAsync(url);
@@ -285,7 +284,7 @@ public class DLsiteScrapper(ILogger logger)
                         result.Genres = genres;
                     else if (categoryMappingTarget == "Tags")
                         result.Tags = genres;
-                    
+
                     continue;
                 }
 
@@ -310,28 +309,42 @@ public class DLsiteScrapper(ILogger logger)
         string searchCategory,
         string query,
         int maxSearchResults = 30,
-        SupportedLanguages language = DefaultLanguage
+        SupportedLanguages language = DefaultLanguage,
+        bool includeAiGeneratedWorks = false
     )
     {
+        var aiFilter = includeAiGeneratedWorks ? "/work_category[4]/ai" : string.Empty;
+
         var searchUrl = searchCategory switch
         {
             "maniax" =>
-                "{0}/fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/doujin/work_category[1]/books/work_category[2]/pc/work_category[3]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+                "{0}/fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/doujin/work_category[1]/books/work_category[2]/pc/work_category[3]/app" +
+                aiFilter + "/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
             "home" =>
-                "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+                "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app" +
+                aiFilter + "/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
             "soft" =>
-                "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/order[0]/trend/options_and_or/and/per_page/{2}/from/fs.header/?locale={3}",
+                "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/pc" + aiFilter +
+                "/order[0]/trend/options_and_or/and/per_page/{2}/from/fs.header/?locale={3}",
             "pro" =>
-                "{0}/fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/pc/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
+                "{0}/fsr/=/language/jp/sex_category[0]/male/keyword/{1}/work_category[0]/pc" + aiFilter +
+                "/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}",
             _ =>
-                "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}"
+                "{0}/fsr/=/language/jp/keyword/{1}/age_category[0]/general/work_category[0]/doujin/work_category[1]/pc/work_category[2]/app" +
+                aiFilter + "/order[0]/trend/options_and_or/and/per_page/{2}/show_type/1/from/fs.header/?locale={3}"
         };
 
         query = query.Replace(" ", "+");
 
         searchUrl = string.Format(searchUrl, searchCategory, query, maxSearchResults, language.ToString());
 
-        var client = new HttpClient();
+        var handler = new HttpClientHandler { UseCookies = true, CookieContainer = new CookieContainer() };
+        var baseUri = new Uri(SiteBaseUrl);
+
+        handler.CookieContainer.Add(baseUri, new Cookie("locale", language.ToString(), "/", ".dlsite.com"));
+        handler.CookieContainer.Add(baseUri, new Cookie("loginchecked", "1", "/", ".dlsite.com"));
+
+        using var client = new HttpClient(handler);
         var responseBody = await client.GetStringAsync(SiteBaseUrl + searchUrl);
 
         var context = BrowsingContext.New(Configuration.Default);
@@ -362,10 +375,10 @@ public class DLsiteScrapper(ILogger logger)
         try
         {
             var handler = new HttpClientHandler { UseCookies = true, CookieContainer = new CookieContainer() };
-            handler.CookieContainer.Add(
-                new Uri("https://www.dlsite.com"),
-                new Cookie("locale", language.ToString())
-            );
+            var baseUri = new Uri("https://www.dlsite.com");
+
+            handler.CookieContainer.Add(baseUri, new Cookie("locale", language.ToString(), "/", ".dlsite.com"));
+            handler.CookieContainer.Add(baseUri, new Cookie("loginchecked", "1", "/", ".dlsite.com"));
 
             using var client = new HttpClient(handler);
             var url = $"https://www.dlsite.com/maniax/product/info/ajax?product_id={productId}&cdn_cache_min=1";
