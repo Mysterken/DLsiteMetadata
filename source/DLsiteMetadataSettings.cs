@@ -1,25 +1,14 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Media;
 using DLsiteMetadata.Enums;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 
 namespace DLsiteMetadata;
 
-public enum AuthStatus
-{
-    Ok,
-    AuthRequired,
-    Failed
-}
-
 public class DLsiteMetadataSettings : ObservableObject
 {
     private bool _assignGameProductFormatToGenre = true;
     private string _categoryMappingTarget = "Genres";
-
     private bool _includeAiGeneratedWorks;
     private bool _includeFileFormat;
 
@@ -34,14 +23,7 @@ public class DLsiteMetadataSettings : ObservableObject
     private string _pageLanguage = "English";
 
     private string _searchCategory = "All categories";
-    private string _sId = string.Empty;
     private string _supportedLanguagesMappingTarget = "None";
-
-    public string SId
-    {
-        get => _sId;
-        set => SetValue(ref _sId, value);
-    }
 
     [DontSerialize]
     public List<string> AvailableSearchCategory { get; } =
@@ -219,11 +201,10 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
 
     private DLsiteMetadataSettings _settings;
 
-    public DLsiteMetadataSettingsViewModel(DLsiteMetadataPlugin plugin, IPlayniteAPI api)
+    public DLsiteMetadataSettingsViewModel(DLsiteMetadataPlugin plugin)
     {
         // Injecting your plugin instance is required for Save/Load method because Playnite saves data to a location based on what plugin requested the operation.
         _plugin = plugin;
-        PlayniteApi = api;
 
         // Load saved settings.
         var savedSettings = plugin.LoadPluginSettings<DLsiteMetadataSettings>();
@@ -231,18 +212,6 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
         // LoadPluginSettings returns null if no saved data is available.
         Settings = savedSettings ?? new DLsiteMetadataSettings();
     }
-
-    private IPlayniteAPI PlayniteApi { get; }
-
-    public AuthStatus AuthStatus => string.IsNullOrEmpty(Settings.SId) ? AuthStatus.AuthRequired : AuthStatus.Ok;
-
-    public string AuthStatusText => AuthStatus switch
-    {
-        AuthStatus.Ok => "Authenticated",
-        AuthStatus.AuthRequired => "Not authenticated",
-        AuthStatus.Failed => "Authentication failed",
-        _ => "Unknown"
-    };
 
     private DLsiteMetadataSettings editingClone { get; set; }
 
@@ -255,36 +224,6 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
             OnPropertyChanged();
         }
     }
-
-    public RelayCommand<object> LoginCommand => new(_ =>
-    {
-        var view = PlayniteApi.WebViews.CreateView(675, 440, Colors.Black);
-        try
-        {
-            view.DeleteDomainCookies(".dlsite.com");
-
-            view.LoadingChanged += async (sender, e) =>
-            {
-                if (sender is not IWebView webView || !webView.GetCurrentAddress().Contains("mypage")) return;
-
-                var httpCookies = await Task.Run(() => webView.GetCookies());
-                var sid = httpCookies.FirstOrDefault(c => c.Name == "__DLsite_SID")?.Value;
-
-                if (!string.IsNullOrEmpty(sid)) Settings.SId = sid;
-
-                webView.Close();
-            };
-
-            view.Navigate("https://www.dlsite.com/home/login/=/skip_register/1");
-            view.OpenDialog();
-        }
-        finally
-        {
-            view.Dispose();
-        }
-
-        OnPropertyChanged(nameof(AuthStatus));
-    });
 
     public void BeginEdit()
     {
