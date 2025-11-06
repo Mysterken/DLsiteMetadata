@@ -15,7 +15,7 @@ public class DLsiteMetadataPlugin : MetadataPlugin
     public DLsiteMetadataPlugin(IPlayniteAPI api) : base(api)
     {
         _playniteApi = api;
-        Settings = new DLsiteMetadataSettingsViewModel(this);
+        Settings = new DLsiteMetadataSettingsViewModel(this, api);
         Properties = new MetadataPluginProperties
         {
             HasSettings = true

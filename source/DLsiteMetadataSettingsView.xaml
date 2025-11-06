@@ -7,7 +7,17 @@
              d:DesignHeight="400" d:DesignWidth="600">
 
     <StackPanel Margin="10">
-        
+
+        <StackPanel Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                <Button Content="Authenticate" Command="{Binding LoginCommand}" Padding="10,5" />
+                <TextBlock Text="{Binding AuthStatusText}" VerticalAlignment="Center" Margin="8,0,0,0" />
+            </StackPanel>
+
+            <TextBlock Text="Authentication may be required to retrieve certain work metadata."
+                       FontSize="11" Foreground="Gray" TextWrapping="Wrap" Margin="4,2,0,0" />
+        </StackPanel>
+
         <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 10">
             <TextBlock Text="Game category:" Margin="0, 0, 5, 0" />
             <ComboBox ItemsSource="{Binding Settings.AvailableSearchCategory}"
@@ -19,7 +29,7 @@
             <ComboBox ItemsSource="{Binding Settings.AvailableLanguages}"
                       SelectedValue="{Binding Settings.PageLanguage}" />
         </StackPanel>
-        
+
         <StackPanel Orientation="Horizontal" Margin="0, 0, 0, 10">
             <TextBlock Text="Assign DLsite genres to:" Margin="0, 0, 5, 0" />
             <ComboBox ItemsSource="{Binding Settings.AvailableCategoryMappingTarget}"

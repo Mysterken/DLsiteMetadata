@@ -1,30 +1,47 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Media;
 using DLsiteMetadata.Enums;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 
 namespace DLsiteMetadata;
 
+public enum AuthStatus
+{
+    Ok,
+    AuthRequired,
+    Failed
+}
+
 public class DLsiteMetadataSettings : ObservableObject
 {
+    private bool _assignGameProductFormatToGenre = true;
+    private string _categoryMappingTarget = "Genres";
+
     private bool _includeAiGeneratedWorks;
+    private bool _includeFileFormat;
 
     private bool _includeIllustrators;
     private bool _includeMusicCreators;
+
+    private bool _includeProductFormat = true;
     private bool _includeScenarioWriters;
     private bool _includeVoiceActors;
-    
-    private bool _includeProductFormat = true;
-    private bool _includeFileFormat;
-
-    private bool _assignGameProductFormatToGenre = true;
 
     private int _maxSearchResults = 30;
     private string _pageLanguage = "English";
 
     private string _searchCategory = "All categories";
-    private string _categoryMappingTarget = "Genres";
+    private string _sId = string.Empty;
     private string _supportedLanguagesMappingTarget = "None";
+
+    public string SId
+    {
+        get => _sId;
+        set => SetValue(ref _sId, value);
+    }
 
     [DontSerialize]
     public List<string> AvailableSearchCategory { get; } =
@@ -83,7 +100,7 @@ public class DLsiteMetadataSettings : ObservableObject
         get => _searchCategory;
         set => SetValue(ref _searchCategory, value);
     }
-    
+
     public string CategoryMappingTarget
     {
         get => _categoryMappingTarget;
@@ -131,13 +148,13 @@ public class DLsiteMetadataSettings : ObservableObject
         get => _includeVoiceActors;
         set => SetValue(ref _includeVoiceActors, value);
     }
-    
+
     public bool IncludeProductFormat
     {
         get => _includeProductFormat;
         set => SetValue(ref _includeProductFormat, value);
     }
-    
+
     public bool IncludeFileFormat
     {
         get => _includeFileFormat;
@@ -202,10 +219,11 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
 
     private DLsiteMetadataSettings _settings;
 
-    public DLsiteMetadataSettingsViewModel(DLsiteMetadataPlugin plugin)
+    public DLsiteMetadataSettingsViewModel(DLsiteMetadataPlugin plugin, IPlayniteAPI api)
     {
         // Injecting your plugin instance is required for Save/Load method because Playnite saves data to a location based on what plugin requested the operation.
         _plugin = plugin;
+        PlayniteApi = api;
 
         // Load saved settings.
         var savedSettings = plugin.LoadPluginSettings<DLsiteMetadataSettings>();
@@ -213,6 +231,18 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
         // LoadPluginSettings returns null if no saved data is available.
         Settings = savedSettings ?? new DLsiteMetadataSettings();
     }
+
+    private IPlayniteAPI PlayniteApi { get; }
+
+    public AuthStatus AuthStatus => string.IsNullOrEmpty(Settings.SId) ? AuthStatus.AuthRequired : AuthStatus.Ok;
+
+    public string AuthStatusText => AuthStatus switch
+    {
+        AuthStatus.Ok => "Authenticated",
+        AuthStatus.AuthRequired => "Not authenticated",
+        AuthStatus.Failed => "Authentication failed",
+        _ => "Unknown"
+    };
 
     private DLsiteMetadataSettings editingClone { get; set; }
 
@@ -225,6 +255,36 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
             OnPropertyChanged();
         }
     }
+
+    public RelayCommand<object> LoginCommand => new(_ =>
+    {
+        var view = PlayniteApi.WebViews.CreateView(675, 440, Colors.Black);
+        try
+        {
+            view.DeleteDomainCookies(".dlsite.com");
+
+            view.LoadingChanged += async (sender, e) =>
+            {
+                if (sender is not IWebView webView || !webView.GetCurrentAddress().Contains("mypage")) return;
+
+                var httpCookies = await Task.Run(() => webView.GetCookies());
+                var sid = httpCookies.FirstOrDefault(c => c.Name == "__DLsite_SID")?.Value;
+
+                if (!string.IsNullOrEmpty(sid)) Settings.SId = sid;
+
+                webView.Close();
+            };
+
+            view.Navigate("https://www.dlsite.com/home/login/=/skip_register/1");
+            view.OpenDialog();
+        }
+        finally
+        {
+            view.Dispose();
+        }
+
+        OnPropertyChanged(nameof(AuthStatus));
+    });
 
     public void BeginEdit()
     {
@@ -255,10 +315,10 @@ public class DLsiteMetadataSettingsViewModel : ObservableObject, ISettings
 
         if (!Settings.AvailableSearchCategory.Contains(Settings.SearchCategory))
             errors.Add("Selected category is not supported.");
-        
+
         if (!Settings.AvailableCategoryMappingTarget.Contains(Settings.CategoryMappingTarget))
             errors.Add("Selected category mapping target is not supported.");
-        
+
         if (!Settings.AvailableSupportedLanguagesMappingTarget.Contains(Settings.SupportedLanguagesMappingTarget))
             errors.Add("Selected supported languages mapping target is not supported.");
 
