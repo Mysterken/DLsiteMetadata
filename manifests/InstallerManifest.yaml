@@ -1,5 +1,11 @@
 ﻿AddonId: 'DLsiteMetadata_db03c8d9-645a-4359-aafb-01cda945f301'
 Packages:
+  - Version: 1.16.1
+    RequiredApiVersion: 6.11.0
+    ReleaseDate: 2025-11-16
+    PackageUrl: https://github.com/Mysterken/DLsiteMetadata/releases/download/v1.16.1/DLsiteMetadata_1_16_1.pext
+    Changelog:
+      - Fix some metadata fields not being fetched
   - Version: 1.16
     RequiredApiVersion: 6.11.0
     ReleaseDate: 2025-11-06

@@ -9,7 +9,7 @@ public static class TranslationDictionary
     {
         { SupportedLanguages.ja_JP, "販売日" },
         { SupportedLanguages.en_US, "Release date" },
-        { SupportedLanguages.zh_CN, "贩卖日" },
+        { SupportedLanguages.zh_CN, "发售日" },
         { SupportedLanguages.zh_TW, "販賣日" },
         { SupportedLanguages.ko_KR, "판매일" },
         { SupportedLanguages.es_ES, "Lanzamiento" },
@@ -225,7 +225,7 @@ public static class TranslationDictionary
     {
         { SupportedLanguages.ja_JP, "作品形式" },
         { SupportedLanguages.en_US, "Product format" },
-        { SupportedLanguages.zh_CN, "作品类型" },
+        { SupportedLanguages.zh_CN, "作品形式" },
         { SupportedLanguages.zh_TW, "作品形式" },
         { SupportedLanguages.ko_KR, "작품 형식" },
         { SupportedLanguages.es_ES, "Formato del Producto" },
@@ -261,9 +261,9 @@ public static class TranslationDictionary
     {
         { SupportedLanguages.ja_JP, "ファイル容量" },
         { SupportedLanguages.en_US, "File size" },
-        { SupportedLanguages.zh_CN, "文件大小" },
-        { SupportedLanguages.zh_TW, "檔案大小" },
-        { SupportedLanguages.ko_KR, "파일 크기" },
+        { SupportedLanguages.zh_CN, "文件容量" },
+        { SupportedLanguages.zh_TW, "檔案容量" },
+        { SupportedLanguages.ko_KR, "파일 용량" },
         { SupportedLanguages.es_ES, "Tamaño del archivo" },
         { SupportedLanguages.de_DE, "Dateigröße" },
         { SupportedLanguages.fr_FR, "Taille du fichier" },
@@ -272,7 +272,7 @@ public static class TranslationDictionary
         { SupportedLanguages.pt_BR, "Tamanho do arquivo" },
         { SupportedLanguages.sv_SE, "Filstorlek" },
         { SupportedLanguages.th_TH, "ขนาดไฟล์" },
-        { SupportedLanguages.vi_VN, "Kích thước tập tin" }
+        { SupportedLanguages.vi_VN, "Dung lượng tệp" }
     };
 
     public static readonly Dictionary<SupportedLanguages, string> AllAges = new()
