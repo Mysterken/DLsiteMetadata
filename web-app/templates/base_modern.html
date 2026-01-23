@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DLsite游戏管理器{% endblock %}</title>
+
+    <!-- 现代化CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 渐变背景 -->
+    <div class="gradient-bg"></div>
+
+    <!-- 现代化导航栏 -->
+    <nav class="navbar-modern">
+        <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <a href="/" class="navbar-brand-modern" style="text-decoration: none;">
+                <i class="bi bi-joystick"></i> DLsite Manager
+            </a>
+
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="/" class="nav-link-modern {% if request.path == '/' %}active{% endif %}">
+                    <i class="bi bi-grid"></i> 游戏库
+                </a>
+                <a href="/collection" class="nav-link-modern {% if request.path == '/collection' %}active{% endif %}">
+                    <i class="bi bi-star-fill"></i> 收藏
+                </a>
+                <a href="/tasks" class="nav-link-modern {% if request.path == '/tasks' %}active{% endif %}">
+                    <i class="bi bi-list-task"></i> 任务
+                </a>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <!-- 统计信息 -->
+                <div id="stats-display" style="display: flex; gap: 1rem; font-size: 0.875rem;">
+                    <span class="badge-modern badge-gradient" id="total-badge">
+                        <i class="bi bi-collection"></i> <span id="total-count">0</span>
+                    </span>
+                </div>
+
+                <!-- 主题切换 -->
+                <button class="btn-icon-modern" onclick="toggleTheme()" title="切换主题">
+                    <i class="bi bi-moon-stars" id="theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Toast通知容器 -->
+    <div id="toast-container" style="position: fixed; bottom: 2rem; left: 2rem; z-index: 9999; display: flex; flex-direction: column; gap: 1rem;">
+    </div>
+
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 现代化主JS -->
+    <script src="{{ url_for('static', filename='js/modern.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            initTheme();
+            initScrollEffect();
+        });
+
+        // 滚动效果
+        function initScrollEffect() {
+            const navbar = document.querySelector('.navbar-modern');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        }
+
+        // 主题切换
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            // 更新图标
+            const icon = document.getElementById('theme-icon');
+            icon.className = newTheme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+        }
+
+        // 初始化主题
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const icon = document.getElementById('theme-icon');
+            icon.className = savedTheme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+        }
+    </script>
+</body>
+</html>

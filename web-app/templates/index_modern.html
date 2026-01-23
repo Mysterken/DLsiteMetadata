@@ -1,0 +1,485 @@
+{% extends "base_modern.html" %}
+
+{% block title %}游戏库 - DLsite游戏管理器{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem;">
+    <!-- 左侧筛选面板 -->
+    <aside class="filter-panel-modern slide-in-left">
+        <!-- 搜索框 -->
+        <div class="filter-section">
+            <label class="filter-label">
+                <i class="bi bi-search"></i> 搜索游戏
+            </label>
+            <div class="search-box-modern">
+                <input type="text"
+                       class="search-input-modern"
+                       id="search-input"
+                       placeholder="游戏名称、RJ号、社团..."
+                       style="padding: 0.75rem 1rem; border-radius: 0.75rem;">
+            </div>
+        </div>
+
+        <!-- 快速添加 -->
+        <div class="filter-section">
+            <label class="filter-label">
+                <i class="bi bi-plus-circle"></i> 快速添加
+            </label>
+            <input type="text"
+                   class="search-input-modern"
+                   id="quick-work-id"
+                   placeholder="RJ123456"
+                   style="padding: 0.75rem 1rem; border-radius: 0.75rem; margin-bottom: 0.75rem;">
+            <button class="btn-primary-modern" onclick="quickScrapeGame()" style="width: 100%;">
+                <i class="bi bi-download"></i> 抓取游戏
+            </button>
+        </div>
+
+        <!-- 状态筛选 -->
+        <div class="filter-section">
+            <label class="filter-label">
+                <i class="bi bi-funnel"></i> 状态筛选
+            </label>
+            <label class="filter-checkbox">
+                <input type="checkbox" id="filter-favorite">
+                <i class="bi bi-star-fill" style="color: #f59e0b;"></i>
+                <span>收藏</span>
+            </label>
+            <label class="filter-checkbox">
+                <input type="checkbox" id="filter-owned">
+                <i class="bi bi-check-circle-fill" style="color: #10b981;"></i>
+                <span>已拥有</span>
+            </label>
+            <label class="filter-checkbox">
+                <input type="checkbox" id="filter-blocked">
+                <i class="bi bi-slash-circle-fill" style="color: #ef4444;"></i>
+                <span>已屏蔽</span>
+            </label>
+        </div>
+
+        <!-- 分类筛选 -->
+        <div class="filter-section">
+            <label class="filter-label">
+                <i class="bi bi-folder"></i> 分类
+            </label>
+            <select class="search-input-modern"
+                    id="category-filter"
+                    style="padding: 0.75rem 1rem; border-radius: 0.75rem; cursor: pointer;">
+                <option value="">全部分类</option>
+            </select>
+        </div>
+
+        <!-- 排序 -->
+        <div class="filter-section">
+            <label class="filter-label">
+                <i class="bi bi-sort-down"></i> 排序方式
+            </label>
+            <select class="search-input-modern"
+                    id="sort-by"
+                    style="padding: 0.75rem 1rem; border-radius: 0.75rem; margin-bottom: 0.75rem; cursor: pointer;">
+                <option value="created_at">添加时间</option>
+                <option value="release_date">发售时间</option>
+                <option value="rating">评分</option>
+                <option value="sale_count">销量</option>
+                <option value="title">标题</option>
+            </select>
+            <select class="search-input-modern"
+                    id="sort-order"
+                    style="padding: 0.75rem 1rem; border-radius: 0.75rem; cursor: pointer;">
+                <option value="desc">降序</option>
+                <option value="asc">升序</option>
+            </select>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <button class="btn-primary-modern" onclick="loadGames()" style="width: 100%;">
+                <i class="bi bi-arrow-clockwise"></i> 应用筛选
+            </button>
+            <button class="btn-icon-modern" onclick="resetFilters()"
+                    style="width: 100%; background: var(--bg-secondary); color: var(--text-secondary);">
+                <i class="bi bi-x-circle"></i> 重置筛选
+            </button>
+        </div>
+    </aside>
+
+    <!-- 右侧游戏网格 -->
+    <div>
+        <!-- 工具栏 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="font-size: 1.75rem; font-weight: 700; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <i class="bi bi-grid-3x3-gap"></i> 游戏库
+            </h2>
+            <button class="btn-primary-modern" onclick="openBatchModal()">
+                <i class="bi bi-files"></i> 批量抓取
+            </button>
+        </div>
+
+        <!-- 加载指示器 -->
+        <div id="loading-indicator" style="display: none; text-align: center; padding: 4rem;">
+            <div class="loading-spinner" style="margin: 0 auto;"></div>
+            <p style="margin-top: 1rem; color: var(--text-secondary);">正在加载游戏...</p>
+        </div>
+
+        <!-- 游戏网格 -->
+        <div id="games-container" class="grid-modern">
+            <!-- 游戏卡片将通过JavaScript动态加载 -->
+        </div>
+
+        <!-- 空状态 -->
+        <div id="empty-state" style="display: none; text-align: center; padding: 4rem;">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: var(--text-tertiary); opacity: 0.5;"></i>
+            <h3 style="margin-top: 1.5rem; color: var(--text-secondary);">没有找到游戏</h3>
+            <p style="color: var(--text-tertiary);">尝试调整筛选条件或添加新游戏</p>
+        </div>
+
+        <!-- 分页 -->
+        <div id="pagination-container" style="margin-top: 3rem; display: flex; justify-content: center; gap: 0.5rem;">
+            <!-- 分页按钮将通过JavaScript动态生成 -->
+        </div>
+    </div>
+</div>
+
+<!-- 批量抓取模态框 -->
+<div id="batch-modal" class="modal-backdrop" style="display: none;" onclick="closeBatchModal(event)">
+    <div class="card-modern" style="max-width: 500px; width: 90%; padding: 2rem; animation: fadeIn 0.3s;">
+        <h3 style="margin-bottom: 1.5rem; font-weight: 700;">
+            <i class="bi bi-files"></i> 批量抓取游戏
+        </h3>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label class="filter-label">Work ID列表（每行一个）</label>
+            <textarea class="search-input-modern"
+                      id="batch-work-ids"
+                      rows="10"
+                      placeholder="RJ123456&#10;RJ234567&#10;RJ345678"
+                      style="padding: 1rem; border-radius: 0.75rem; resize: vertical; font-family: monospace;"></textarea>
+            <small style="color: var(--text-tertiary); font-size: 0.8125rem;">支持RJ、RE、BJ、VJ开头的Work ID</small>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label class="filter-label">语言</label>
+            <select class="search-input-modern"
+                    id="batch-language"
+                    style="padding: 0.75rem 1rem; border-radius: 0.75rem; cursor: pointer;">
+                <option value="zh_CN">简体中文</option>
+                <option value="ja_JP">日本語</option>
+                <option value="en_US">English</option>
+                <option value="zh_TW">繁體中文</option>
+                <option value="ko_KR">한국어</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+            <button class="btn-icon-modern" onclick="closeBatchModal()"
+                    style="flex: 1; background: var(--bg-secondary); color: var(--text-secondary);">
+                取消
+            </button>
+            <button class="btn-primary-modern" onclick="batchScrapeGames()" style="flex: 1;">
+                <i class="bi bi-download"></i> 开始抓取
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+@media (max-width: 1024px) {
+    #games-container {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .filter-panel-modern {
+        display: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+let totalPages = 1;
+
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    loadCategories();
+    loadGames();
+
+    // 搜索框防抖
+    let searchTimeout;
+    document.getElementById('search-input').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => loadGames(), 500);
+    });
+});
+
+// 加载游戏列表
+async function loadGames(page = 1) {
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const gamesContainer = document.getElementById('games-container');
+    const emptyState = document.getElementById('empty-state');
+
+    loadingIndicator.style.display = 'block';
+    gamesContainer.style.display = 'none';
+    emptyState.style.display = 'none';
+
+    try {
+        const params = {
+            page: page,
+            per_page: 18,
+            search: document.getElementById('search-input').value,
+            category_id: document.getElementById('category-filter').value,
+            is_favorite: document.getElementById('filter-favorite').checked ? 'true' : undefined,
+            is_owned: document.getElementById('filter-owned').checked ? 'true' : undefined,
+            is_blocked: document.getElementById('filter-blocked').checked ? 'true' : undefined,
+            sort_by: document.getElementById('sort-by').value,
+            order: document.getElementById('sort-order').value
+        };
+
+        Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
+
+        const response = await axios.get('/api/games', { params });
+        const data = response.data;
+
+        loadingIndicator.style.display = 'none';
+
+        if (data.success && data.games.length > 0) {
+            renderGames(data.games);
+            renderPagination(data.page, data.pages);
+            currentPage = data.page;
+            totalPages = data.pages;
+            gamesContainer.style.display = 'grid';
+        } else {
+            emptyState.style.display = 'block';
+        }
+    } catch (error) {
+        loadingIndicator.style.display = 'none';
+        console.error('加载游戏失败:', error);
+        showToast('加载失败', error.message, 'error');
+    }
+}
+
+// 渲染游戏卡片
+function renderGames(games) {
+    const container = document.getElementById('games-container');
+    container.innerHTML = games.map((game, index) => `
+        <div class="card-modern game-card-modern fade-in" style="animation-delay: ${index * 0.05}s;">
+            <div class="game-card-image" onclick="viewGame('${game.work_id}')">
+                <img src="${game.cover_url || game.icon_url || '/static/images/placeholder.jpg'}"
+                     alt="${game.title}"
+                     loading="lazy"
+                     onerror="this.src='/static/images/placeholder.jpg'">
+                <div class="game-card-overlay">
+                    <div style="color: white; font-size: 0.875rem; line-height: 1.5;">
+                        ${game.description ? game.description.substring(0, 100) + '...' : '暂无介绍'}
+                    </div>
+                </div>
+            </div>
+            <div class="game-card-body">
+                <h3 class="game-card-title" title="${game.title}">${game.title}</h3>
+                <div class="game-card-meta">
+                    <i class="bi bi-building"></i>
+                    <span>${game.circle || '未知社团'}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-size: 0.75rem; color: var(--text-tertiary);">${game.work_id}</span>
+                    ${game.rating ? `
+                        <span class="badge-modern badge-rating">
+                            <i class="bi bi-star-fill"></i> ${game.rating.toFixed(1)}
+                        </span>
+                    ` : ''}
+                </div>
+                <div class="game-card-actions">
+                    <button class="btn-icon-modern ${game.is_favorite ? 'active' : ''}"
+                            onclick="toggleFavorite('${game.work_id}', ${!game.is_favorite})"
+                            title="收藏">
+                        <i class="bi bi-star${game.is_favorite ? '-fill' : ''}"></i>
+                    </button>
+                    <button class="btn-icon-modern ${game.is_owned ? 'active' : ''}"
+                            onclick="toggleOwned('${game.work_id}', ${!game.is_owned})"
+                            title="已拥有">
+                        <i class="bi bi-check-circle${game.is_owned ? '-fill' : ''}"></i>
+                    </button>
+                    <button class="btn-icon-modern ${game.is_blocked ? 'active' : ''}"
+                            onclick="toggleBlocked('${game.work_id}', ${!game.is_blocked})"
+                            title="屏蔽">
+                        <i class="bi bi-slash-circle${game.is_blocked ? '-fill' : ''}"></i>
+                    </button>
+                    <button class="btn-icon-modern"
+                            onclick="viewGame('${game.work_id}')"
+                            title="查看详情"
+                            style="margin-left: auto;">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 渲染分页
+function renderPagination(currentPage, totalPages) {
+    const container = document.getElementById('pagination-container');
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+
+    // 上一页
+    if (currentPage > 1) {
+        html += `<button class="btn-icon-modern" onclick="loadGames(${currentPage - 1})">
+            <i class="bi bi-chevron-left"></i>
+        </button>`;
+    }
+
+    // 页码
+    const maxPages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+    let endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+    if (endPage - startPage < maxPages - 1) {
+        startPage = Math.max(1, endPage - maxPages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<button class="btn-icon-modern ${i === currentPage ? 'active' : ''}"
+                         onclick="loadGames(${i})">${i}</button>`;
+    }
+
+    // 下一页
+    if (currentPage < totalPages) {
+        html += `<button class="btn-icon-modern" onclick="loadGames(${currentPage + 1})">
+            <i class="bi bi-chevron-right"></i>
+        </button>`;
+    }
+
+    container.innerHTML = html;
+}
+
+// 快速抓取游戏
+async function quickScrapeGame() {
+    const workId = document.getElementById('quick-work-id').value.trim().toUpperCase();
+    if (!workId) {
+        showToast('错误', '请输入Work ID', 'error');
+        return;
+    }
+
+    try {
+        showToast('开始抓取', `正在抓取游戏 ${workId}...`, 'info');
+        const response = await axios.post('/api/scrape/game', {
+            work_id: workId,
+            language: 'zh_CN'
+        });
+
+        if (response.data.success) {
+            showToast('成功', `游戏 ${workId} 抓取成功！`, 'success');
+            document.getElementById('quick-work-id').value = '';
+            loadGames(currentPage);
+        }
+    } catch (error) {
+        console.error('抓取失败:', error);
+        showToast('失败', error.response?.data?.error || error.message, 'error');
+    }
+}
+
+// 批量抓取相关
+function openBatchModal() {
+    document.getElementById('batch-modal').style.display = 'flex';
+}
+
+function closeBatchModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('batch-modal').style.display = 'none';
+}
+
+async function batchScrapeGames() {
+    const textarea = document.getElementById('batch-work-ids');
+    const language = document.getElementById('batch-language').value;
+    const workIds = textarea.value.split('\n')
+        .map(id => id.trim().toUpperCase())
+        .filter(id => id && /^(RJ|RE|BJ|VJ)\d{6,8}$/i.test(id));
+
+    if (workIds.length === 0) {
+        showToast('错误', '请输入有效的Work ID', 'error');
+        return;
+    }
+
+    try {
+        const response = await axios.post('/api/scrape/batch', {
+            work_ids: workIds,
+            language: language
+        });
+
+        if (response.data.success) {
+            showToast('成功', `批量抓取任务已创建，共 ${workIds.length} 个游戏`, 'success');
+            closeBatchModal();
+            textarea.value = '';
+        }
+    } catch (error) {
+        console.error('批量抓取失败:', error);
+        showToast('失败', error.response?.data?.error || error.message, 'error');
+    }
+}
+
+// 查看游戏详情
+function viewGame(workId) {
+    window.location.href = `/game/${workId}`;
+}
+
+// 切换收藏、拥有、屏蔽状态
+async function toggleFavorite(workId, value) {
+    await updateGameStatus(workId, { is_favorite: value });
+}
+
+async function toggleOwned(workId, value) {
+    await updateGameStatus(workId, { is_owned: value });
+}
+
+async function toggleBlocked(workId, value) {
+    await updateGameStatus(workId, { is_blocked: value });
+}
+
+async function updateGameStatus(workId, data) {
+    try {
+        const response = await axios.put(`/api/games/${workId}`, data);
+        if (response.data.success) {
+            loadGames(currentPage);
+            loadStats();
+        }
+    } catch (error) {
+        console.error('更新失败:', error);
+        showToast('失败', error.response?.data?.error || error.message, 'error');
+    }
+}
+
+// 重置筛选
+function resetFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-favorite').checked = false;
+    document.getElementById('filter-owned').checked = false;
+    document.getElementById('filter-blocked').checked = false;
+    document.getElementById('category-filter').value = '';
+    document.getElementById('sort-by').value = 'created_at';
+    document.getElementById('sort-order').value = 'desc';
+    loadGames();
+}
+</script>
+{% endblock %}

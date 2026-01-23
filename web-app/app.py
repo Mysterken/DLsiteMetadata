@@ -61,7 +61,13 @@ def init_database():
 # ==================== Web页面路由 ====================
 @app.route('/')
 def index():
-    """首页 - 游戏列表"""
+    """首页 - 游戏列表（现代化界面）"""
+    return render_template('index_modern.html')
+
+
+@app.route('/classic')
+def index_classic():
+    """经典界面"""
     return render_template('index.html')
 
 
