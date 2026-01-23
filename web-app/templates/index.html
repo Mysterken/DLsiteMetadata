@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+
+{% block title %}游戏库 - DLsite游戏管理器{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- 左侧过滤面板 -->
+    <div class="col-md-3">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-funnel"></i> 筛选选项
+            </div>
+            <div class="card-body">
+                <!-- 搜索框 -->
+                <div class="mb-3">
+                    <label class="form-label">搜索</label>
+                    <input type="text" class="form-control" id="search-input" placeholder="游戏名称、RJ号、社团...">
+                </div>
+
+                <!-- 状态筛选 -->
+                <div class="mb-3">
+                    <label class="form-label">状态筛选</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="filter-favorite">
+                        <label class="form-check-label" for="filter-favorite">
+                            <i class="bi bi-star-fill text-warning"></i> 收藏
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="filter-owned">
+                        <label class="form-check-label" for="filter-owned">
+                            <i class="bi bi-check-circle-fill text-success"></i> 已拥有
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="filter-blocked">
+                        <label class="form-check-label" for="filter-blocked">
+                            <i class="bi bi-slash-circle-fill text-danger"></i> 已屏蔽
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 分类筛选 -->
+                <div class="mb-3">
+                    <label class="form-label">分类</label>
+                    <select class="form-select" id="category-filter">
+                        <option value="">全部分类</option>
+                    </select>
+                </div>
+
+                <!-- 排序 -->
+                <div class="mb-3">
+                    <label class="form-label">排序方式</label>
+                    <select class="form-select" id="sort-by">
+                        <option value="created_at">添加时间</option>
+                        <option value="release_date">发售时间</option>
+                        <option value="rating">评分</option>
+                        <option value="sale_count">销量</option>
+                        <option value="title">标题</option>
+                    </select>
+                    <select class="form-select mt-2" id="sort-order">
+                        <option value="desc">降序</option>
+                        <option value="asc">升序</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary w-100" onclick="loadGames()">
+                    <i class="bi bi-search"></i> 应用筛选
+                </button>
+                <button class="btn btn-outline-secondary w-100 mt-2" onclick="resetFilters()">
+                    <i class="bi bi-arrow-counterclockwise"></i> 重置
+                </button>
+            </div>
+        </div>
+
+        <!-- 快速操作 -->
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-plus-circle"></i> 快速添加
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Work ID</label>
+                    <input type="text" class="form-control" id="quick-work-id" placeholder="RJ123456">
+                </div>
+                <button class="btn btn-success w-100" onclick="quickScrapeGame()">
+                    <i class="bi bi-download"></i> 抓取游戏
+                </button>
+                <button class="btn btn-outline-success w-100 mt-2" data-bs-toggle="modal" data-bs-target="#batch-modal">
+                    <i class="bi bi-files"></i> 批量抓取
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧游戏列表 -->
+    <div class="col-md-9">
+        <!-- 加载指示器 -->
+        <div id="loading-indicator" class="text-center py-5" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-3">正在加载游戏...</p>
+        </div>
+
+        <!-- 游戏网格 -->
+        <div id="games-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <!-- 游戏卡片将通过JavaScript动态加载 -->
+        </div>
+
+        <!-- 空状态提示 -->
+        <div id="empty-state" class="text-center py-5" style="display: none;">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+            <h4 class="mt-3 text-muted">没有找到游戏</h4>
+            <p class="text-muted">尝试调整筛选条件或添加新游戏</p>
+        </div>
+
+        <!-- 分页 -->
+        <nav aria-label="游戏列表分页" class="mt-4">
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- 分页按钮将通过JavaScript动态生成 -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- 批量抓取模态框 -->
+<div class="modal fade" id="batch-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">批量抓取游戏</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Work ID列表（每行一个）</label>
+                    <textarea class="form-control" id="batch-work-ids" rows="10" placeholder="RJ123456&#10;RJ234567&#10;RJ345678"></textarea>
+                    <small class="form-text text-muted">支持RJ、RE、BJ、VJ开头的Work ID</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">语言</label>
+                    <select class="form-select" id="batch-language">
+                        <option value="zh_CN">简体中文</option>
+                        <option value="ja_JP">日本語</option>
+                        <option value="en_US">English</option>
+                        <option value="zh_TW">繁體中文</option>
+                        <option value="ko_KR">한국어</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="batchScrapeGames()">
+                    <i class="bi bi-download"></i> 开始抓取
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+let totalPages = 1;
+
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    loadCategories();
+    loadGames();
+
+    // 搜索框防抖
+    let searchTimeout;
+    document.getElementById('search-input').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => loadGames(), 500);
+    });
+});
+
+// 加载游戏列表
+async function loadGames(page = 1) {
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const gamesContainer = document.getElementById('games-container');
+    const emptyState = document.getElementById('empty-state');
+
+    loadingIndicator.style.display = 'block';
+    gamesContainer.style.display = 'none';
+    emptyState.style.display = 'none';
+
+    try {
+        // 构建查询参数
+        const params = {
+            page: page,
+            per_page: 12,
+            search: document.getElementById('search-input').value,
+            category_id: document.getElementById('category-filter').value,
+            is_favorite: document.getElementById('filter-favorite').checked ? 'true' : undefined,
+            is_owned: document.getElementById('filter-owned').checked ? 'true' : undefined,
+            is_blocked: document.getElementById('filter-blocked').checked ? 'true' : undefined,
+            sort_by: document.getElementById('sort-by').value,
+            order: document.getElementById('sort-order').value
+        };
+
+        // 移除undefined的参数
+        Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
+
+        const response = await axios.get('/api/games', { params });
+        const data = response.data;
+
+        loadingIndicator.style.display = 'none';
+
+        if (data.success && data.games.length > 0) {
+            renderGames(data.games);
+            renderPagination(data.page, data.pages);
+            currentPage = data.page;
+            totalPages = data.pages;
+            gamesContainer.style.display = 'flex';
+        } else {
+            emptyState.style.display = 'block';
+        }
+    } catch (error) {
+        loadingIndicator.style.display = 'none';
+        console.error('加载游戏失败:', error);
+        showToast('加载失败', error.message, 'danger');
+    }
+}
+
+// 渲染游戏卡片
+function renderGames(games) {
+    const container = document.getElementById('games-container');
+    container.innerHTML = games.map(game => `
+        <div class="col">
+            <div class="card h-100 game-card">
+                <img src="${game.cover_url || game.icon_url || '/static/images/placeholder.jpg'}"
+                     class="card-img-top" alt="${game.title}"
+                     onerror="this.src='/static/images/placeholder.jpg'">
+                <div class="card-body">
+                    <h6 class="card-title text-truncate" title="${game.title}">${game.title}</h6>
+                    <p class="card-text text-muted small">
+                        <i class="bi bi-building"></i> ${game.circle || '未知社团'}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">${game.work_id}</small>
+                        ${game.rating ? `<span class="badge bg-warning">
+                            <i class="bi bi-star-fill"></i> ${game.rating.toFixed(1)}
+                        </span>` : ''}
+                    </div>
+                    <div class="btn-group w-100" role="group">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewGame('${game.work_id}')">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm ${game.is_favorite ? 'btn-warning' : 'btn-outline-warning'}"
+                                onclick="toggleFavorite('${game.work_id}', ${!game.is_favorite})">
+                            <i class="bi bi-star${game.is_favorite ? '-fill' : ''}"></i>
+                        </button>
+                        <button class="btn btn-sm ${game.is_owned ? 'btn-success' : 'btn-outline-success'}"
+                                onclick="toggleOwned('${game.work_id}', ${!game.is_owned})">
+                            <i class="bi bi-check-circle${game.is_owned ? '-fill' : ''}"></i>
+                        </button>
+                        <button class="btn btn-sm ${game.is_blocked ? 'btn-danger' : 'btn-outline-danger'}"
+                                onclick="toggleBlocked('${game.work_id}', ${!game.is_blocked})">
+                            <i class="bi bi-slash-circle${game.is_blocked ? '-fill' : ''}"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 渲染分页
+function renderPagination(currentPage, totalPages) {
+    const pagination = document.getElementById('pagination');
+    let html = '';
+
+    // 上一页
+    html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="loadGames(${currentPage - 1}); return false;">上一页</a>
+    </li>`;
+
+    // 页码
+    const maxPages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+    let endPage = Math.min(totalPages, startPage + maxPages - 1);
+
+    if (endPage - startPage < maxPages - 1) {
+        startPage = Math.max(1, endPage - maxPages + 1);
+    }
+
+    if (startPage > 1) {
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="loadGames(1); return false;">1</a></li>`;
+        if (startPage > 2) {
+            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+            <a class="page-link" href="#" onclick="loadGames(${i}); return false;">${i}</a>
+        </li>`;
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="loadGames(${totalPages}); return false;">${totalPages}</a></li>`;
+    }
+
+    // 下一页
+    html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="loadGames(${currentPage + 1}); return false;">下一页</a>
+    </li>`;
+
+    pagination.innerHTML = html;
+}
+
+// 快速抓取游戏
+async function quickScrapeGame() {
+    const workId = document.getElementById('quick-work-id').value.trim().toUpperCase();
+    if (!workId) {
+        showToast('错误', '请输入Work ID', 'danger');
+        return;
+    }
+
+    try {
+        showToast('开始抓取', `正在抓取游戏 ${workId}...`, 'info');
+        const response = await axios.post('/api/scrape/game', {
+            work_id: workId,
+            language: 'zh_CN'
+        });
+
+        if (response.data.success) {
+            showToast('成功', `游戏 ${workId} 抓取成功！`, 'success');
+            document.getElementById('quick-work-id').value = '';
+            loadGames(currentPage);
+        } else {
+            showToast('失败', response.data.error, 'danger');
+        }
+    } catch (error) {
+        console.error('抓取失败:', error);
+        showToast('失败', error.response?.data?.error || error.message, 'danger');
+    }
+}
+
+// 批量抓取游戏
+async function batchScrapeGames() {
+    const textarea = document.getElementById('batch-work-ids');
+    const language = document.getElementById('batch-language').value;
+    const workIds = textarea.value.split('\n')
+        .map(id => id.trim().toUpperCase())
+        .filter(id => id && /^(RJ|RE|BJ|VJ)\d{6,8}$/i.test(id));
+
+    if (workIds.length === 0) {
+        showToast('错误', '请输入有效的Work ID', 'danger');
+        return;
+    }
+
+    try {
+        const response = await axios.post('/api/scrape/batch', {
+            work_ids: workIds,
+            language: language
+        });
+
+        if (response.data.success) {
+            showToast('成功', `批量抓取任务已创建，共 ${workIds.length} 个游戏`, 'success');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('batch-modal'));
+            modal.hide();
+            textarea.value = '';
+        } else {
+            showToast('失败', response.data.error, 'danger');
+        }
+    } catch (error) {
+        console.error('批量抓取失败:', error);
+        showToast('失败', error.response?.data?.error || error.message, 'danger');
+    }
+}
+
+// 查看游戏详情
+function viewGame(workId) {
+    window.location.href = `/game/${workId}`;
+}
+
+// 切换收藏状态
+async function toggleFavorite(workId, value) {
+    await updateGameStatus(workId, { is_favorite: value });
+}
+
+// 切换拥有状态
+async function toggleOwned(workId, value) {
+    await updateGameStatus(workId, { is_owned: value });
+}
+
+// 切换屏蔽状态
+async function toggleBlocked(workId, value) {
+    await updateGameStatus(workId, { is_blocked: value });
+}
+
+// 更新游戏状态
+async function updateGameStatus(workId, data) {
+    try {
+        const response = await axios.put(`/api/games/${workId}`, data);
+        if (response.data.success) {
+            loadGames(currentPage);
+            loadStats();
+        }
+    } catch (error) {
+        console.error('更新失败:', error);
+        showToast('失败', error.response?.data?.error || error.message, 'danger');
+    }
+}
+
+// 重置筛选
+function resetFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-favorite').checked = false;
+    document.getElementById('filter-owned').checked = false;
+    document.getElementById('filter-blocked').checked = false;
+    document.getElementById('category-filter').value = '';
+    document.getElementById('sort-by').value = 'created_at';
+    document.getElementById('sort-order').value = 'desc';
+    loadGames();
+}
+</script>
+{% endblock %}

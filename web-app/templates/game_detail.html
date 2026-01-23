@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block title %}游戏详情 - DLsite游戏管理器{% endblock %}
+
+{% block content %}
+<div id="loading-indicator" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">加载中...</span>
+    </div>
+</div>
+
+<div id="game-detail" style="display: none;">
+    <!-- 返回按钮 -->
+    <div class="mb-3">
+        <button class="btn btn-outline-secondary" onclick="history.back()">
+            <i class="bi bi-arrow-left"></i> 返回
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- 左侧图片和基本信息 -->
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <img id="game-cover" src="" class="card-img-top" alt="游戏封面">
+                <div class="card-body">
+                    <h5 id="game-title" class="card-title"></h5>
+                    <p class="text-muted">
+                        <i class="bi bi-building"></i> <span id="game-circle"></span>
+                    </p>
+                    <p class="text-muted">
+                        <i class="bi bi-calendar"></i> <span id="game-release-date"></span>
+                    </p>
+                    <div id="game-rating" class="mb-3"></div>
+
+                    <!-- 快速操作 -->
+                    <div class="d-grid gap-2">
+                        <button id="btn-favorite" class="btn btn-outline-warning" onclick="toggleFavorite()">
+                            <i class="bi bi-star"></i> <span id="text-favorite">收藏</span>
+                        </button>
+                        <button id="btn-owned" class="btn btn-outline-success" onclick="toggleOwned()">
+                            <i class="bi bi-check-circle"></i> <span id="text-owned">标记拥有</span>
+                        </button>
+                        <button id="btn-blocked" class="btn btn-outline-danger" onclick="toggleBlocked()">
+                            <i class="bi bi-slash-circle"></i> <span id="text-blocked">屏蔽</span>
+                        </button>
+                        <a id="dlsite-link" href="#" target="_blank" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-up-right"></i> 前往DLsite
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 用户评分 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-star"></i> 我的评分
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">评分（1-5星）</label>
+                        <select class="form-select" id="user-rating">
+                            <option value="">未评分</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 极佳</option>
+                            <option value="4">⭐⭐⭐⭐ 很好</option>
+                            <option value="3">⭐⭐⭐ 一般</option>
+                            <option value="2">⭐⭐ 较差</option>
+                            <option value="1">⭐ 很差</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">备注</label>
+                        <textarea class="form-control" id="user-notes" rows="4" placeholder="添加你的备注..."></textarea>
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="saveUserData()">
+                        <i class="bi bi-save"></i> 保存
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧详细信息 -->
+        <div class="col-md-8">
+            <!-- 描述 -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-file-text"></i> 游戏介绍
+                </div>
+                <div class="card-body">
+                    <p id="game-description"></p>
+                </div>
+            </div>
+
+            <!-- 详细信息 -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-info-circle"></i> 详细信息
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody id="game-info-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 标签 -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-tags"></i> 标签/类型
+                </div>
+                <div class="card-body">
+                    <div id="game-genres"></div>
+                </div>
+            </div>
+
+            <!-- 分类管理 -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-folder"></i> 分类管理
+                </div>
+                <div class="card-body">
+                    <div id="game-categories" class="mb-3"></div>
+                    <div class="input-group">
+                        <select class="form-select" id="add-category-select">
+                            <option value="">选择分类...</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="addToCategory()">
+                            <i class="bi bi-plus"></i> 添加
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 样图 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-images"></i> 游戏截图
+                </div>
+                <div class="card-body">
+                    <div id="sample-images" class="row row-cols-2 row-cols-md-3 g-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let gameData = null;
+const workId = '{{ work_id }}';
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadGameDetail();
+    loadCategories();
+});
+
+async function loadGameDetail() {
+    try {
+        const response = await axios.get(`/api/games/${workId}`);
+        if (response.data.success) {
+            gameData = response.data.game;
+            renderGameDetail();
+        } else {
+            showToast('错误', response.data.error, 'danger');
+        }
+    } catch (error) {
+        console.error('加载游戏详情失败:', error);
+        showToast('错误', '加载失败', 'danger');
+    }
+}
+
+function renderGameDetail() {
+    document.getElementById('loading-indicator').style.display = 'none';
+    document.getElementById('game-detail').style.display = 'block';
+
+    // 基本信息
+    document.getElementById('game-cover').src = gameData.cover_url || gameData.icon_url || '/static/images/placeholder.jpg';
+    document.getElementById('game-title').textContent = gameData.title;
+    document.getElementById('game-circle').textContent = gameData.circle || '未知';
+    document.getElementById('game-release-date').textContent = gameData.release_date || '未知';
+    document.getElementById('game-description').textContent = gameData.description || '暂无介绍';
+
+    // 评分
+    if (gameData.rating) {
+        document.getElementById('game-rating').innerHTML = `
+            <span class="badge bg-warning">
+                <i class="bi bi-star-fill"></i> ${gameData.rating.toFixed(1)}
+            </span>
+            <span class="text-muted ms-2">(${gameData.review_count || 0}条评论)</span>
+        `;
+    }
+
+    // DLsite链接
+    document.getElementById('dlsite-link').href = gameData.dlsite_url;
+
+    // 按钮状态
+    updateButtons();
+
+    // 用户数据
+    document.getElementById('user-rating').value = gameData.user_rating || '';
+    document.getElementById('user-notes').value = gameData.user_notes || '';
+
+    // 详细信息表格
+    renderInfoTable();
+
+    // 标签
+    if (gameData.genres && gameData.genres.length > 0) {
+        document.getElementById('game-genres').innerHTML = gameData.genres
+            .map(genre => `<span class="badge bg-secondary me-1">${genre}</span>`)
+            .join('');
+    }
+
+    // 分类
+    renderCategories();
+
+    // 样图
+    if (gameData.sample_images && gameData.sample_images.length > 0) {
+        document.getElementById('sample-images').innerHTML = gameData.sample_images
+            .map(img => `
+                <div class="col">
+                    <img src="${img}" class="img-fluid rounded" style="cursor: pointer;"
+                         onclick="window.open('${img}', '_blank')">
+                </div>
+            `).join('');
+    }
+}
+
+function renderInfoTable() {
+    const infoItems = [
+        { label: 'Work ID', value: gameData.work_id },
+        { label: '系列', value: gameData.series },
+        { label: '作者', value: gameData.authors?.join(', ') },
+        { label: '插画', value: gameData.illustrators?.join(', ') },
+        { label: '配音', value: gameData.voice_actors?.join(', ') },
+        { label: '剧本', value: gameData.scenario_writers?.join(', ') },
+        { label: '音乐', value: gameData.music_creators?.join(', ') },
+        { label: '年龄分级', value: gameData.age_rating },
+        { label: '文件大小', value: gameData.file_size },
+        { label: '文件格式', value: gameData.file_format },
+        { label: '销量', value: gameData.sale_count },
+    ];
+
+    const html = infoItems
+        .filter(item => item.value)
+        .map(item => `
+            <tr>
+                <th style="width: 150px;">${item.label}</th>
+                <td>${item.value}</td>
+            </tr>
+        `).join('');
+
+    document.getElementById('game-info-table').innerHTML = html;
+}
+
+function renderCategories() {
+    const container = document.getElementById('game-categories');
+    if (gameData.categories && gameData.categories.length > 0) {
+        container.innerHTML = gameData.categories
+            .map(cat => `
+                <span class="badge bg-info me-1">
+                    ${cat}
+                    <i class="bi bi-x-circle ms-1" style="cursor: pointer;"
+                       onclick="removeFromCategory('${cat}')"></i>
+                </span>
+            `).join('');
+    } else {
+        container.innerHTML = '<span class="text-muted">未添加到任何分类</span>';
+    }
+}
+
+function updateButtons() {
+    // 收藏按钮
+    const btnFavorite = document.getElementById('btn-favorite');
+    if (gameData.is_favorite) {
+        btnFavorite.classList.remove('btn-outline-warning');
+        btnFavorite.classList.add('btn-warning');
+        btnFavorite.querySelector('i').classList.add('bi-star-fill');
+        btnFavorite.querySelector('i').classList.remove('bi-star');
+        document.getElementById('text-favorite').textContent = '已收藏';
+    } else {
+        btnFavorite.classList.add('btn-outline-warning');
+        btnFavorite.classList.remove('btn-warning');
+        btnFavorite.querySelector('i').classList.remove('bi-star-fill');
+        btnFavorite.querySelector('i').classList.add('bi-star');
+        document.getElementById('text-favorite').textContent = '收藏';
+    }
+
+    // 拥有按钮
+    const btnOwned = document.getElementById('btn-owned');
+    if (gameData.is_owned) {
+        btnOwned.classList.remove('btn-outline-success');
+        btnOwned.classList.add('btn-success');
+        btnOwned.querySelector('i').classList.add('bi-check-circle-fill');
+        btnOwned.querySelector('i').classList.remove('bi-check-circle');
+        document.getElementById('text-owned').textContent = '已拥有';
+    } else {
+        btnOwned.classList.add('btn-outline-success');
+        btnOwned.classList.remove('btn-success');
+        btnOwned.querySelector('i').classList.remove('bi-check-circle-fill');
+        btnOwned.querySelector('i').classList.add('bi-check-circle');
+        document.getElementById('text-owned').textContent = '标记拥有';
+    }
+
+    // 屏蔽按钮
+    const btnBlocked = document.getElementById('btn-blocked');
+    if (gameData.is_blocked) {
+        btnBlocked.classList.remove('btn-outline-danger');
+        btnBlocked.classList.add('btn-danger');
+        btnBlocked.querySelector('i').classList.add('bi-slash-circle-fill');
+        btnBlocked.querySelector('i').classList.remove('bi-slash-circle');
+        document.getElementById('text-blocked').textContent = '已屏蔽';
+    } else {
+        btnBlocked.classList.add('btn-outline-danger');
+        btnBlocked.classList.remove('btn-danger');
+        btnBlocked.querySelector('i').classList.remove('bi-slash-circle-fill');
+        btnBlocked.querySelector('i').classList.add('bi-slash-circle');
+        document.getElementById('text-blocked').textContent = '屏蔽';
+    }
+}
+
+async function toggleFavorite() {
+    await updateGame({ is_favorite: !gameData.is_favorite });
+}
+
+async function toggleOwned() {
+    await updateGame({ is_owned: !gameData.is_owned });
+}
+
+async function toggleBlocked() {
+    await updateGame({ is_blocked: !gameData.is_blocked });
+}
+
+async function saveUserData() {
+    const userRating = document.getElementById('user-rating').value;
+    const userNotes = document.getElementById('user-notes').value;
+
+    await updateGame({
+        user_rating: userRating ? parseInt(userRating) : null,
+        user_notes: userNotes
+    });
+}
+
+async function updateGame(data) {
+    try {
+        const response = await axios.put(`/api/games/${workId}`, data);
+        if (response.data.success) {
+            gameData = response.data.game;
+            updateButtons();
+            showToast('成功', '更新成功', 'success');
+        }
+    } catch (error) {
+        console.error('更新失败:', error);
+        showToast('失败', error.response?.data?.error || error.message, 'danger');
+    }
+}
+
+async function addToCategory() {
+    const categoryId = document.getElementById('add-category-select').value;
+    if (!categoryId) {
+        showToast('提示', '请选择分类', 'warning');
+        return;
+    }
+
+    try {
+        const response = await axios.post(`/api/games/${workId}/categories`, {
+            category_id: parseInt(categoryId)
+        });
+        if (response.data.success) {
+            showToast('成功', '已添加到分类', 'success');
+            await loadGameDetail();
+        }
+    } catch (error) {
+        showToast('失败', error.response?.data?.error || error.message, 'danger');
+    }
+}
+
+async function removeFromCategory(categoryName) {
+    // 需要获取category_id，简化处理
+    if (confirm(`确定要从"${categoryName}"分类中移除吗？`)) {
+        showToast('提示', '此功能需要完善', 'info');
+    }
+}
+</script>
+{% endblock %}

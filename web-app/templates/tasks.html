@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}任务管理 - DLsite游戏管理器{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-list-task"></i> 爬取任务管理
+        </h2>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>任务ID</th>
+                                <th>类型</th>
+                                <th>状态</th>
+                                <th>进度</th>
+                                <th>创建时间</th>
+                                <th>完成时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasks-tbody">
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadTasks();
+    // 每5秒自动刷新
+    setInterval(loadTasks, 5000);
+});
+
+async function loadTasks() {
+    try {
+        const response = await axios.get('/api/tasks');
+        if (response.data.success) {
+            renderTasks(response.data.tasks);
+        }
+    } catch (error) {
+        console.error('加载任务失败:', error);
+    }
+}
+
+function renderTasks(tasks) {
+    const tbody = document.getElementById('tasks-tbody');
+
+    if (tasks.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                    <p class="mt-3">暂无任务</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = tasks.map(task => {
+        const statusBadge = getStatusBadge(task.status);
+        const progress = task.progress || 0;
+
+        return `
+            <tr>
+                <td>#${task.id}</td>
+                <td>${getTaskTypeText(task.task_type)}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div class="progress" style="min-width: 100px;">
+                        <div class="progress-bar ${getProgressClass(task.status)}"
+                             role="progressbar" style="width: ${progress}%"
+                             aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100">
+                            ${progress.toFixed(0)}%
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        ${task.completed_items}/${task.total_items}
+                        ${task.failed_items > 0 ? `(失败: ${task.failed_items})` : ''}
+                    </small>
+                </td>
+                <td><small>${formatDate(task.created_at)}</small></td>
+                <td><small>${task.completed_at ? formatDate(task.completed_at) : '-'}</small></td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="viewTaskDetail(${task.id})">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'pending': '<span class="badge bg-secondary">等待中</span>',
+        'running': '<span class="badge bg-primary">进行中</span>',
+        'completed': '<span class="badge bg-success">已完成</span>',
+        'failed': '<span class="badge bg-danger">失败</span>'
+    };
+    return badges[status] || status;
+}
+
+function getProgressClass(status) {
+    const classes = {
+        'pending': 'bg-secondary',
+        'running': 'bg-primary progress-bar-animated',
+        'completed': 'bg-success',
+        'failed': 'bg-danger'
+    };
+    return classes[status] || '';
+}
+
+function getTaskTypeText(type) {
+    const types = {
+        'search': '搜索',
+        'single': '单个',
+        'batch': '批量'
+    };
+    return types[type] || type;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleString('zh-CN');
+}
+
+function viewTaskDetail(taskId) {
+    // TODO: 实现任务详情查看
+    showToast('提示', `查看任务 #${taskId} 的详情`, 'info');
+}
+</script>
+{% endblock %}

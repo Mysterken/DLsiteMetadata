@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}我的收藏 - DLsite游戏管理器{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-star-fill text-warning"></i> 我的收藏
+        </h2>
+
+        <!-- 统计卡片 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">总收藏</h5>
+                        <h2 id="stat-favorite">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">已拥有</h5>
+                        <h2 id="stat-owned">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">想玩</h5>
+                        <h2 id="stat-wishlist">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">已屏蔽</h5>
+                        <h2 id="stat-blocked">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分类标签页 -->
+        <ul class="nav nav-tabs mb-3" id="collection-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="favorite-tab" data-bs-toggle="tab"
+                        data-bs-target="#favorite-pane" type="button" role="tab">
+                    <i class="bi bi-star-fill"></i> 收藏
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="owned-tab" data-bs-toggle="tab"
+                        data-bs-target="#owned-pane" type="button" role="tab">
+                    <i class="bi bi-check-circle-fill"></i> 已拥有
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="categories-tab" data-bs-toggle="tab"
+                        data-bs-target="#categories-pane" type="button" role="tab">
+                    <i class="bi bi-folder"></i> 按分类
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="blocked-tab" data-bs-toggle="tab"
+                        data-bs-target="#blocked-pane" type="button" role="tab">
+                    <i class="bi bi-slash-circle-fill"></i> 已屏蔽
+                </button>
+            </li>
+        </ul>
+
+        <!-- 标签页内容 -->
+        <div class="tab-content" id="collection-tab-content">
+            <!-- 收藏 -->
+            <div class="tab-pane fade show active" id="favorite-pane" role="tabpanel">
+                <div id="favorite-games" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已拥有 -->
+            <div class="tab-pane fade" id="owned-pane" role="tabpanel">
+                <div id="owned-games" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 按分类 -->
+            <div class="tab-pane fade" id="categories-pane" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="list-group" id="categories-list">
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div id="category-games" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已屏蔽 -->
+            <div class="tab-pane fade" id="blocked-pane" role="tabpanel">
+                <div id="blocked-games" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadCollectionStats();
+    loadFavoriteGames();
+
+    // 标签切换事件
+    document.getElementById('favorite-tab').addEventListener('shown.bs.tab', loadFavoriteGames);
+    document.getElementById('owned-tab').addEventListener('shown.bs.tab', loadOwnedGames);
+    document.getElementById('categories-tab').addEventListener('shown.bs.tab', loadCategoriesView);
+    document.getElementById('blocked-tab').addEventListener('shown.bs.tab', loadBlockedGames);
+});
+
+async function loadCollectionStats() {
+    try {
+        const response = await axios.get('/api/stats');
+        if (response.data.success) {
+            const stats = response.data.stats;
+            document.getElementById('stat-favorite').textContent = stats.favorite_games;
+            document.getElementById('stat-owned').textContent = stats.owned_games;
+            document.getElementById('stat-blocked').textContent = stats.blocked_games;
+            // TODO: 获取"想玩"分类的统计
+        }
+    } catch (error) {
+        console.error('加载统计失败:', error);
+    }
+}
+
+async function loadFavoriteGames() {
+    await loadFilteredGames('favorite-games', { is_favorite: true });
+}
+
+async function loadOwnedGames() {
+    await loadFilteredGames('owned-games', { is_owned: true });
+}
+
+async function loadBlockedGames() {
+    await loadFilteredGames('blocked-games', { is_blocked: true });
+}
+
+async function loadFilteredGames(containerId, filters) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>';
+
+    try {
+        const response = await axios.get('/api/games', {
+            params: { ...filters, per_page: 100 }
+        });
+
+        if (response.data.success && response.data.games.length > 0) {
+            container.innerHTML = response.data.games.map(game => `
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="${game.cover_url || game.icon_url || '/static/images/placeholder.jpg'}"
+                             class="card-img-top" alt="${game.title}">
+                        <div class="card-body">
+                            <h6 class="card-title text-truncate">${game.title}</h6>
+                            <p class="card-text text-muted small">${game.circle || '未知'}</p>
+                            <button class="btn btn-sm btn-primary w-100" onclick="viewGame('${game.work_id}')">
+                                查看详情
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">暂无内容</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('加载失败:', error);
+        container.innerHTML = '<div class="col-12 text-center py-5 text-danger">加载失败</div>';
+    }
+}
+
+async function loadCategoriesView() {
+    const listContainer = document.getElementById('categories-list');
+    const gamesContainer = document.getElementById('category-games');
+
+    try {
+        const response = await axios.get('/api/categories');
+        if (response.data.success) {
+            const categories = response.data.categories;
+
+            if (categories.length > 0) {
+                listContainer.innerHTML = categories.map((cat, index) => `
+                    <button type="button"
+                            class="list-group-item list-group-item-action ${index === 0 ? 'active' : ''}"
+                            onclick="loadCategoryGames(${cat.id}, this)"
+                            style="border-left: 4px solid ${cat.color};">
+                        <i class="bi bi-folder"></i> ${cat.name}
+                        <span class="badge bg-secondary float-end">${cat.game_count}</span>
+                    </button>
+                `).join('');
+
+                // 自动加载第一个分类
+                if (categories.length > 0) {
+                    loadCategoryGames(categories[0].id);
+                }
+            } else {
+                listContainer.innerHTML = '<div class="text-center py-3 text-muted">暂无分类</div>';
+                gamesContainer.innerHTML = '';
+            }
+        }
+    } catch (error) {
+        console.error('加载分类失败:', error);
+    }
+}
+
+async function loadCategoryGames(categoryId, button) {
+    // 更新激活状态
+    if (button) {
+        document.querySelectorAll('#categories-list .list-group-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        button.classList.add('active');
+    }
+
+    const container = document.getElementById('category-games');
+    container.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>';
+
+    try {
+        const response = await axios.get('/api/games', {
+            params: { category_id: categoryId, per_page: 100 }
+        });
+
+        if (response.data.success && response.data.games.length > 0) {
+            container.innerHTML = response.data.games.map(game => `
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="${game.cover_url || game.icon_url || '/static/images/placeholder.jpg'}"
+                             class="card-img-top" alt="${game.title}">
+                        <div class="card-body">
+                            <h6 class="card-title text-truncate">${game.title}</h6>
+                            <p class="card-text text-muted small">${game.circle || '未知'}</p>
+                            <button class="btn btn-sm btn-primary w-100" onclick="viewGame('${game.work_id}')">
+                                查看详情
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">该分类暂无游戏</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('加载分类游戏失败:', error);
+    }
+}
+
+function viewGame(workId) {
+    window.location.href = `/game/${workId}`;
+}
+</script>
+{% endblock %}

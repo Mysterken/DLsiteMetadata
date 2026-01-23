@@ -1,0 +1,246 @@
+/* DLsite游戏管理器 - 自定义样式 */
+
+/* 全局样式 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* 导航栏 */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+/* 卡片样式 */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* 游戏卡片 */
+.game-card {
+    cursor: pointer;
+}
+
+.game-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    background-color: #e9ecef;
+}
+
+.game-card .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-height: 2.5em;
+    line-height: 1.25;
+}
+
+.game-card .card-body {
+    padding: 0.75rem;
+}
+
+/* 按钮组 */
+.btn-group .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+/* 徽章 */
+.badge {
+    font-weight: 500;
+}
+
+/* 加载动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* 图片预览 */
+.img-fluid {
+    transition: transform 0.2s;
+}
+
+.img-fluid:hover {
+    transform: scale(1.05);
+}
+
+/* 分页 */
+.pagination {
+    margin-top: 2rem;
+}
+
+.page-link {
+    color: #007bff;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* 表格 */
+.table {
+    background-color: white;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* 进度条 */
+.progress {
+    height: 1.5rem;
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* 表单 */
+.form-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Toast通知 */
+.toast-container {
+    z-index: 9999;
+}
+
+.toast {
+    min-width: 250px;
+}
+
+/* 空状态 */
+#empty-state i {
+    color: #dee2e6;
+}
+
+/* 加载指示器 */
+#loading-indicator {
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 统计卡片 */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-warning,
+.card.bg-danger {
+    color: white;
+}
+
+.card.bg-primary .card-title,
+.card.bg-success .card-title,
+.card.bg-warning .card-title,
+.card.bg-danger .card-title {
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.card.bg-primary h2,
+.card.bg-success h2,
+.card.bg-warning h2,
+.card.bg-danger h2 {
+    margin: 0;
+    font-weight: bold;
+}
+
+/* 分类列表 */
+.list-group-item {
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.list-group-item.active {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .game-card .card-img-top {
+        height: 150px;
+    }
+
+    .game-card .card-title {
+        font-size: 0.85rem;
+    }
+
+    .btn-group .btn {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
+}
+
+/* 样图网格 */
+#sample-images img {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#sample-images img:hover {
+    transform: scale(1.05);
+}
+
+/* 标签 */
+.badge {
+    padding: 0.35em 0.65em;
+    margin: 0.2em;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* 动画效果 */
+.card,
+.btn,
+.badge {
+    transition: all 0.2s ease;
+}
