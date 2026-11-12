@@ -45,6 +45,20 @@ public class DLsiteScrapper(ILogger logger)
 
             using var client = new HttpClient(handler);
             res = await client.GetAsync(url);
+
+            // Withdrawn or unknown products answer 404 with a regular DLsite error page.
+            if (res.StatusCode == HttpStatusCode.NotFound)
+            {
+                var notFoundBody = await res.Content.ReadAsStringAsync();
+                var notFoundDocument = await BrowsingContext.New(Configuration.Default)
+                    .OpenAsync(req => req.Content(notFoundBody));
+                var notFoundMessage = notFoundDocument.QuerySelector(".p-errorPc__title")?.Text().Trim();
+
+                logger.Warn($"Product not found: {url}");
+                throw new ProductUnavailableException(
+                    string.IsNullOrEmpty(notFoundMessage) ? "Product not found on DLsite" : notFoundMessage);
+            }
+
             res.EnsureSuccessStatusCode();
         }
         catch (HttpRequestException e)
@@ -61,6 +75,15 @@ public class DLsiteScrapper(ILogger logger)
 
         var productIdMatch = Regex.Match(url, @"product_id/([A-Z]{2}\d+)");
         var productId = productIdMatch.Success ? productIdMatch.Groups[1].Value : null;
+
+        // Products that cannot be bought from the user's country/region still answer 200,
+        // but only render a restriction notice instead of the product.
+        var restrictionMessage = document.QuerySelector(".p-restricted .error_message")?.Text().Trim();
+        if (!string.IsNullOrEmpty(restrictionMessage))
+        {
+            logger.Warn($"Product unavailable: {restrictionMessage}");
+            throw new ProductUnavailableException(restrictionMessage);
+        }
 
         var errorBox = document.QuerySelector(".error_box_work");
         if (errorBox != null)
@@ -109,7 +132,7 @@ public class DLsiteScrapper(ILogger logger)
 
             foreach (var header in tableHeaders)
             {
-                if (header.TextContent.Contains(TranslationDictionary.ReleaseDate[language]))
+                if (HeaderMatches(header, TranslationDictionary.ReleaseDate[language]))
                 {
                     // The displayed text is formatted differently for every locale, but the
                     // link wrapping it always points to ".../year/YYYY/mon/MM/day/DD/...".
@@ -129,20 +152,20 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.UpdateDate[language]))
+                if (HeaderMatches(header, TranslationDictionary.UpdateDate[language]))
                 {
                     result.UpdateDate = header.NextElementSibling?.ChildNodes
                         .FirstOrDefault(node => node.NodeType == NodeType.Text)?.TextContent.Trim();
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.Series[language]))
+                if (HeaderMatches(header, TranslationDictionary.Series[language]))
                 {
                     result.Series = header.NextElementSibling?.Text().Trim();
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.Author[language]))
+                if (HeaderMatches(header, TranslationDictionary.Author[language]))
                 {
                     result.Author = header.NextElementSibling?
                         .QuerySelectorAll("a")
@@ -151,7 +174,7 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.Scenario[language]))
+                if (HeaderMatches(header, TranslationDictionary.Scenario[language]))
                 {
                     result.ScenarioWriters = header.NextElementSibling?
                         .QuerySelectorAll("a")
@@ -160,7 +183,7 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.Illustration[language]))
+                if (HeaderMatches(header, TranslationDictionary.Illustration[language]))
                 {
                     result.Illustrators = header.NextElementSibling?
                         .QuerySelectorAll("a")
@@ -169,7 +192,7 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.VoiceActor[language]))
+                if (HeaderMatches(header, TranslationDictionary.VoiceActor[language]))
                 {
                     result.VoiceActors = header.NextElementSibling?
                         .QuerySelectorAll("a")
@@ -178,7 +201,7 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.Music[language]))
+                if (HeaderMatches(header, TranslationDictionary.Music[language]))
                 {
                     result.MusicCreators = header.NextElementSibling?
                         .QuerySelectorAll("a")
@@ -187,7 +210,7 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.Age[language]))
+                if (HeaderMatches(header, TranslationDictionary.Age[language]))
                 {
                     var ageRating = header.NextElementSibling?.Text().Trim();
                     var ageLabelClasses = header.NextElementSibling?.QuerySelector("[class^='label_']")?.ClassName;
@@ -213,16 +236,18 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.ProductFormat[language]))
+                if (HeaderMatches(header, TranslationDictionary.ProductFormat[language]))
                 {
-                    var formatElements = header.NextElementSibling?.QuerySelectorAll("a") ??
+                    // The main format is a link to the work type (Action, Manga, Voice / ASMR...),
+                    // additional formats (Music, Video...) are plain labels.
+                    var formatElements = header.NextElementSibling?.QuerySelectorAll("a, span[class^='label_']") ??
                                          Enumerable.Empty<IElement>();
 
                     // Group formats by type (game vs. other) and extract text.
                     var formatsByType = formatElements
                         .Select(e => new
                         {
-                            Text = (e.QuerySelector("span") ?? e).Text()?.Trim(),
+                            Text = e.Text()?.Trim(),
                             IsGameType = e.GetAttribute("href")?.Contains("work_type") == true
                         })
                         .Where(item => !string.IsNullOrEmpty(item.Text))
@@ -233,7 +258,7 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.FileFormat[language]))
+                if (HeaderMatches(header, TranslationDictionary.FileFormat[language]))
                 {
                     result.FileFormat = header.NextElementSibling?
                         .QuerySelectorAll("span")
@@ -242,16 +267,16 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.Miscellaneous[language]))
+                if (HeaderMatches(header, TranslationDictionary.Miscellaneous[language]))
                 {
                     result.Miscellaneous = header.NextElementSibling?
-                        .QuerySelectorAll("span")
+                        .QuerySelectorAll("a, span[class^='label_']")
                         .Select(x => x.Text().Trim())
                         .ToList();
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.GameSupportedLanguages[language]))
+                if (HeaderMatches(header, TranslationDictionary.GameSupportedLanguages[language]))
                 {
                     result.SupportedLanguages = header.NextElementSibling?
                         .QuerySelectorAll("a")
@@ -260,7 +285,7 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.Genre[language]))
+                if (HeaderMatches(header, TranslationDictionary.Genre[language]))
                 {
                     // Only genre links: the cell may also hold campaign badges (e.g. DLsite Awards).
                     var genres = header.NextElementSibling?
@@ -276,7 +301,7 @@ public class DLsiteScrapper(ILogger logger)
                     continue;
                 }
 
-                if (header.TextContent.Contains(TranslationDictionary.Filesize[language]))
+                if (HeaderMatches(header, TranslationDictionary.Filesize[language]))
                     result.Filesize = header.NextElementSibling?.Text().Trim();
             }
         }
@@ -303,6 +328,12 @@ public class DLsiteScrapper(ILogger logger)
     private static bool ContainsIgnoreCase(string haystack, string needle)
     {
         return haystack.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    /// DLsite's capitalisation of the outline labels differs from locale to locale (and over time).
+    private static bool HeaderMatches(IElement header, string label)
+    {
+        return ContainsIgnoreCase(header.TextContent, label);
     }
 
     /// The Product entry of the page's schema.org JSON-LD blocks (title, circle, short description, images).
