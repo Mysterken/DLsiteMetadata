@@ -90,65 +90,42 @@ public class DLsiteScrapper(ILogger logger)
 
         result.Title ??= document.GetElementById("work_name")?.Text().Trim();
 
-        var circle = document.QuerySelector("[itemprop='brand']")?.Text().Trim();
-        result.Circle = circle;
+        var productLd = ParseProductJsonLd(document);
 
-        var ciEn = document.QuerySelector(".link_cien a")?.GetAttribute("href");
+        result.Title ??= productLd?.Value<string>("name")?.Trim();
+
+        result.Circle = document.QuerySelector(".c-productInfo__makerName")?.Text().Trim()
+                        ?? productLd?["brand"]?.Value<string>("name")?.Trim();
+
+        var ciEn = document.QuerySelector(".cienLink a, .link_cien a")?.GetAttribute("href");
         if (ciEn is not null) result.Links.Add("Ci-en", ciEn);
 
-        var table = document.GetElementById("work_outline");
-        if (table is not null)
+        // The work outline is rendered as <dt class="c-productInfo__key"> / <dd> pairs
+        // (the former #work_outline table no longer exists).
+        var outlineKeys = document.QuerySelectorAll("dt.c-productInfo__key");
+        if (outlineKeys.Length > 0)
         {
-            var tableHeaders = table.QuerySelectorAll("th");
+            var tableHeaders = outlineKeys;
 
             foreach (var header in tableHeaders)
             {
                 if (header.TextContent.Contains(TranslationDictionary.ReleaseDate[language]))
                 {
-                    var releaseDateString = header.NextElementSibling?.Text().Trim();
-                    DateTime releaseDate;
+                    // The displayed text is formatted differently for every locale, but the
+                    // link wrapping it always points to ".../year/YYYY/mon/MM/day/DD/...".
+                    var releaseDateHref = header.NextElementSibling?.QuerySelector("a")?.GetAttribute("href");
+                    var releaseDateMatch = releaseDateHref is null
+                        ? Match.Empty
+                        : ReleaseDateHrefRegex.Match(releaseDateHref);
 
-                    switch (language)
-                    {
-                        case SupportedLanguages.ja_JP:
-                        case SupportedLanguages.zh_CN:
-                        case SupportedLanguages.zh_TW:
-                            DateTime.TryParseExact(releaseDateString,
-                                ["yyyy'年'MM'月'dd'日'", "yyyy'年'MM'月'dd'日' H'時'"],
-                                CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
-                            break;
-                        case SupportedLanguages.en_US:
-                            DateTime.TryParseExact(releaseDateString,
-                                ["MMM/dd/yyyy", "MMM/dd/yyyy H"],
-                                CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
-                            break;
-                        case SupportedLanguages.ko_KR:
-                            DateTime.TryParseExact(releaseDateString,
-                                ["yyyy'년 'MM'월 'dd'일'", "yyyy'년 'MM'월 'dd'일 H'시'"],
-                                CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
-                            break;
-                        case SupportedLanguages.es_ES:
-                            DateTime.TryParseExact(releaseDateString,
-                                ["MM/dd/yyyy", "MM/dd/yyyy H"],
-                                CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
-                            break;
-                        case SupportedLanguages.de_DE:
-                        case SupportedLanguages.fr_FR:
-                        case SupportedLanguages.id_ID:
-                        case SupportedLanguages.it_IT:
-                        case SupportedLanguages.pt_BR:
-                        case SupportedLanguages.sv_SE:
-                        case SupportedLanguages.th_TH:
-                        case SupportedLanguages.vi_VN:
-                            DateTime.TryParseExact(releaseDateString,
-                                ["dd/MM/yyyy", "dd/MM/yyyy H"],
-                                CultureInfo.InvariantCulture, DateTimeStyles.None, out releaseDate);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(language), language, "Unsupported language");
-                    }
+                    if (releaseDateMatch.Success)
+                        result.ReleaseDate = new DateTime(
+                            int.Parse(releaseDateMatch.Groups[1].Value),
+                            int.Parse(releaseDateMatch.Groups[2].Value),
+                            int.Parse(releaseDateMatch.Groups[3].Value));
+                    else
+                        logger.Warn($"Unable to parse release date for {url}");
 
-                    result.ReleaseDate = releaseDate;
                     continue;
                 }
 
@@ -213,12 +190,22 @@ public class DLsiteScrapper(ILogger logger)
                 if (header.TextContent.Contains(TranslationDictionary.Age[language]))
                 {
                     var ageRating = header.NextElementSibling?.Text().Trim();
+                    var ageLabelClasses = header.NextElementSibling?.QuerySelector("[class^='label_']")?.ClassName;
 
-                    if (TranslationDictionary.AllAges[language].Contains(ageRating))
+                    // The label's CSS class is language independent, prefer it over the translated text.
+                    if (ageLabelClasses?.Contains("label_all") == true)
                         result.Age = DLsiteScrapperResult.AgeRating.AllAges;
-                    else if (TranslationDictionary.R15[language].Contains(ageRating))
+                    else if (ageLabelClasses?.Contains("label_r15") == true)
                         result.Age = DLsiteScrapperResult.AgeRating.RRated;
-                    else if (TranslationDictionary.Adult[language].Contains(ageRating))
+                    else if (ageLabelClasses?.Contains("label_r18") == true)
+                        result.Age = DLsiteScrapperResult.AgeRating.Adult;
+                    else if (ageRating is null)
+                        logger.Error("Unknown age rating: <missing>");
+                    else if (ContainsIgnoreCase(TranslationDictionary.AllAges[language], ageRating))
+                        result.Age = DLsiteScrapperResult.AgeRating.AllAges;
+                    else if (ContainsIgnoreCase(TranslationDictionary.R15[language], ageRating))
+                        result.Age = DLsiteScrapperResult.AgeRating.RRated;
+                    else if (ContainsIgnoreCase(TranslationDictionary.Adult[language], ageRating))
                         result.Age = DLsiteScrapperResult.AgeRating.Adult;
                     else
                         logger.Error($"Unknown age rating: {ageRating}");
@@ -235,7 +222,7 @@ public class DLsiteScrapper(ILogger logger)
                     var formatsByType = formatElements
                         .Select(e => new
                         {
-                            Text = e.QuerySelector("span")?.Text()?.Trim(),
+                            Text = (e.QuerySelector("span") ?? e).Text()?.Trim(),
                             IsGameType = e.GetAttribute("href")?.Contains("work_type") == true
                         })
                         .Where(item => !string.IsNullOrEmpty(item.Text))
@@ -275,8 +262,9 @@ public class DLsiteScrapper(ILogger logger)
 
                 if (header.TextContent.Contains(TranslationDictionary.Genre[language]))
                 {
+                    // Only genre links: the cell may also hold campaign badges (e.g. DLsite Awards).
                     var genres = header.NextElementSibling?
-                        .QuerySelectorAll("a")
+                        .QuerySelectorAll("a[href*='/genre/']")
                         .Select(x => x.Text().Trim())
                         .ToList();
 
@@ -294,15 +282,77 @@ public class DLsiteScrapper(ILogger logger)
         }
 
         var images = ParseImages(document);
+        if (images.Count == 0) images = ParseJsonLdImages(productLd);
         result.MainImage = images.FirstOrDefault(x => x.Contains("_img_main"));
         result.Icon = result.MainImage?.Replace("_img_main", "_img_sam_mini");
         result.ProductImages = images;
 
-        var descriptionHtml = document.QuerySelector("[itemprop='description']")?.InnerHtml;
-        var description = descriptionHtml?.Replace("//img.dlsite.jp", "https://img.dlsite.jp");
-        result.Description = Regex.Replace(description?.Trim(), @"^\s*$\n|\r", string.Empty, RegexOptions.Multiline);
+        var description = ParseDescription(document)
+                          ?? productLd?.Value<string>("description")?.Trim();
+
+        result.Description = string.IsNullOrWhiteSpace(description)
+            ? null
+            : Regex.Replace(description.Replace("//img.dlsite.jp", "https://img.dlsite.jp").Trim(),
+                @"^\s*$\n|\r", string.Empty, RegexOptions.Multiline);
 
         return result;
+    }
+
+    private static readonly Regex ReleaseDateHrefRegex = new(@"year/(\d{4})/mon/(\d{1,2})/day/(\d{1,2})");
+
+    private static bool ContainsIgnoreCase(string haystack, string needle)
+    {
+        return haystack.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    /// The Product entry of the page's schema.org JSON-LD blocks (title, circle, short description, images).
+    private static JObject ParseProductJsonLd(IDocument document)
+    {
+        foreach (var script in document.QuerySelectorAll("script[type='application/ld+json']"))
+            try
+            {
+                if (JToken.Parse(script.TextContent) is JObject obj && obj.Value<string>("@type") == "Product")
+                    return obj;
+            }
+            catch (Exception)
+            {
+                // Malformed JSON-LD block, try the next one.
+            }
+
+        return null;
+    }
+
+    private static List<string> ParseJsonLdImages(JObject productLd)
+    {
+        return (productLd?["image"] as JArray)?
+               .Select(x => x.Value<string>())
+               .Where(x => x != null && x.Contains("img.dlsite.jp"))
+               .Distinct()
+               .ToList()
+               ?? new List<string>();
+    }
+
+    /// Builds the description from the page's content sections (an optional heading followed by free-form HTML).
+    private static string ParseDescription(IDocument document)
+    {
+        var sections = document.QuerySelectorAll(".c-productInfo__inner section.c-productContent");
+        var html = new System.Text.StringBuilder();
+
+        foreach (var section in sections)
+        {
+            var title = section.QuerySelector(".headline__title")?.Text().Trim();
+            if (!string.IsNullOrEmpty(title)) html.AppendLine($"<h3>{WebUtility.HtmlEncode(title)}</h3>");
+
+            var body = (IElement)section.Clone(true);
+            foreach (var headline in body.QuerySelectorAll(".headline").ToList()) headline.Remove();
+
+            html.AppendLine(body.InnerHtml);
+        }
+
+        // Drop Vue's hydration comments and scoped-style attributes, they only add noise.
+        var cleaned = Regex.Replace(html.ToString(), @"<!--[\s\S]*?-->|\sdata-v-[0-9a-f]+(=""[^""]*"")?", string.Empty);
+
+        return string.IsNullOrWhiteSpace(cleaned) ? null : cleaned;
     }
 
     public async Task<List<DLsiteSearchResult>> ScrapSearchPage(
@@ -413,15 +463,12 @@ public class DLsiteScrapper(ILogger logger)
     {
         var images = new List<string>();
 
-        var imagesContainer = document.GetElementById("work_left");
-
-        if (imagesContainer is null) return images;
-
-        var imageElements = imagesContainer.QuerySelectorAll(".product-slider-data div")
-            .Where(x => x.GetAttribute("data-src") is not null)
-            .Where(x => x.GetAttribute("data-src")!.Contains("img.dlsite.jp"))
-            .Select(x => x.GetAttribute("data-src"))
-            .Select(x => x?.Replace("//img.dlsite.jp", "https://img.dlsite.jp"))
+        // Full size images of the key visual slider (the thumbnail strip uses resized copies and is excluded).
+        var imageElements = document.QuerySelectorAll(".work_slider .key-visual-slider img")
+            .Select(x => x.GetAttribute("src"))
+            .Where(x => x != null && x.Contains("img.dlsite.jp"))
+            .Select(x => x.StartsWith("//") ? "https:" + x : x)
+            .Distinct()
             .ToList();
 
         images.AddRange(imageElements);

@@ -378,10 +378,13 @@ public class DLsiteMetadataProvider(
                     "DLsiteMetadata Error"
                 );
             else
+            {
+                Logger.Error(ae.Flatten(), $"Failed to fetch metadata from DLsite for {gameName ?? "the selected game"}");
                 playniteApi.Dialogs.ShowErrorMessage(
                     $"Failed to fetch metadata from DLsite for {gameName ?? "the selected game"}",
                     "DLsiteMetadata Error"
                 );
+            }
         }
     }
 
