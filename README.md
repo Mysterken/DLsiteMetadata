@@ -75,12 +75,31 @@ You can configure the plugin by going to the plugin settings and setting the fol
 | Max Search Results                     | 30             | Maximum amount of search results that should appear                          |
 | Assign Game Product Format to Genres   | Yes            | This will assign work_type Product Format to the Genres field in Playnite    |
 
+## Development
+
+Metadata comes from the JSON API DLsite's own pages use (`/api/product/{site}/fetchProduct/{id}`), which is already
+localized and exposes credits, age rating and series as structured fields. If that call fails, the same data is read
+from the payload embedded in the work page. Only the game search still reads a server-rendered page.
+
+The tests run against responses recorded from DLsite, so they work offline:
+
+```
+msbuild source/DLsiteMetadata.sln /restore
+dotnet vstest tests/DLsiteMetadata.Tests/bin/Debug/DLsiteMetadata.Tests.dll
+```
+
+Set `DLSITE_LIVE_TESTS=1` to also run the tests that call the real DLsite (a weekly CI job does this to spot changes
+on DLsite's side). Two scripts in `tools/` help maintaining the project:
+
+- `record_fixtures.py` re-records the fixtures in `tests/DLsiteMetadata.Tests/Fixtures`.
+- `generate_language_names.py` regenerates `SupportedLanguageNames.cs`, the localized language names the API lacks.
+
 ## Roadmap
 
 - [x] Add the possibility to fetch metadata from every category at once
 - [x] Fetch a game by its work ID instead of the full URL
+- [x] Add tests
 - [ ] Automatic .pext packaging at every release
-- [ ] Add tests
 
 ## Acknowledgments
 

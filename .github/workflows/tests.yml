@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly canary: also runs the tests that talk to the real DLsite,
+    # to notice changes of its API or pages before users do.
+    - cron: "0 6 * * 1"
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - uses: NuGet/setup-nuget@v2
+
+      - name: Restore plugin packages
+        run: nuget restore source/DLsiteMetadata.sln
+
+      - name: Build
+        run: msbuild source/DLsiteMetadata.sln /restore /p:Configuration=Debug /v:minimal
+
+      - name: Test
+        env:
+          # The live tests only run for the weekly schedule and manual runs.
+          DLSITE_LIVE_TESTS: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '1' || '0' }}
+        run: dotnet vstest tests/DLsiteMetadata.Tests/bin/Debug/DLsiteMetadata.Tests.dll
