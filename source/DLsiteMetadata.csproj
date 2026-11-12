@@ -89,12 +89,16 @@
     <Compile Include="DLsiteMetadataSettingsView.xaml.cs">
       <DependentUpon>DLsiteMetadataSettingsView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DLsiteProductApi.cs"/>
+    <Compile Include="DLsiteProductMapper.cs"/>
     <Compile Include="DLsiteScrapper.cs"/>
     <Compile Include="DLsiteScrapperResult.cs"/>
     <Compile Include="Enums\SupportedLanguages.cs" />
+    <Compile Include="Exceptions\DLsiteApiException.cs" />
     <Compile Include="Exceptions\ProductUnavailableException.cs" />
+    <Compile Include="NuxtPayloadReader.cs"/>
     <Compile Include="Properties\AssemblyInfo.cs"/>
-    <Compile Include="TranslationDictionary.cs" />
+    <Compile Include="SupportedLanguageNames.cs"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config"/>
